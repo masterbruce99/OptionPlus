@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { calculateStraddleExpectedMove, calculateVolatilityExpectedMove } from '../lib/probability/expectedMove';
 import { calculateOptionProbabilities } from '../lib/probability/probabilityEngine';
 import { calculateProbabilityOfProfit } from '../lib/probability/probabilityOfProfit';
@@ -29,11 +29,11 @@ export default function ProbabilityScanner() {
   });
 
   // Mock historical data just for the demo/UI (but clearly label if missing)
-  const mockHistoricalPrices: HistoricalPrice[] = Array(30).fill(0).map((_, i) => ({
+  const mockHistoricalPrices = useMemo<HistoricalPrice[]>(() => Array(30).fill(0).map((_, i) => ({
     date: `Day ${i}`,
     close: 100 + Math.random() * 5 - 2.5
-  }));
-  const mockHistoricalIvs = Array(30).fill(0).map(() => 0.20 + Math.random() * 0.10);
+  })), []);
+  const mockHistoricalIvs = useMemo(() => Array(30).fill(0).map(() => 0.20 + Math.random() * 0.10), []);
 
   const volContext = buildVolatilityContext({
     currentIV: iv,

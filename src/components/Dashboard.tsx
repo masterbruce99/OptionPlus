@@ -12,6 +12,7 @@ import { PortfolioScanner } from './PortfolioScanner';
 import { OptionContract } from '@/lib/providers/MarketDataProvider';
 import { MarketDataProvider } from '../lib/providers/MarketDataProvider';
 import ProbabilityScanner from './ProbabilityScanner';
+import TradeSetups from './TradeSetups';
 import { OpportunitySnapshot } from '../lib/store';
 
 export default function Dashboard() {
@@ -28,7 +29,7 @@ export default function Dashboard() {
   const [selectedOption, setSelectedOption] = useState<OptionContract | null>(null);
   
   // Phase 3 & later State
-  const [activeTab, setActiveTab] = useState<'chain' | 'analyzer' | 'arbitrage' | 'opportunities' | 'journal' | 'backtest' | 'datacenter' | 'portfolio' | 'probability'>('chain');
+  const [activeTab, setActiveTab] = useState<'chain' | 'analyzer' | 'arbitrage' | 'opportunities' | 'journal' | 'backtest' | 'datacenter' | 'portfolio' | 'probability' | 'trade-setups'>('chain');
 
   const searchSymbol = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -242,6 +243,12 @@ export default function Dashboard() {
           >
             Data Center
           </button>
+          <button 
+            onClick={() => setActiveTab('trade-setups')}
+            style={{ padding: '10px 20px', backgroundColor: activeTab === 'trade-setups' ? 'var(--accent-primary)' : 'var(--bg-tertiary)', color: activeTab === 'trade-setups' ? '#fff' : 'var(--text-primary)', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
+          >
+            Trade Setups
+          </button>
         </div>
       )}
 
@@ -351,6 +358,12 @@ export default function Dashboard() {
       {activeTab === 'probability' && (
         <div className="animate-fade-in">
           <ProbabilityScanner />
+        </div>
+      )}
+
+      {expirations.length > 0 && activeTab === 'trade-setups' && (
+        <div className="animate-fade-in">
+          <TradeSetups quote={quote} chain={chain} />
         </div>
       )}
     </div>

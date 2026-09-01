@@ -272,6 +272,26 @@ export const educationalDictionary: Record<TermKey, Explanation> = {
     simple: 'Comparing IV across near-term and far-term options. Usually longer-dated options have higher IV (contango). When near-term IV is higher (backwardation), it often signals a near-term event like earnings.',
     whyItMatters: 'Term structure tells you whether the market expects more volatility in the near future or the distant future. Shifts can signal event-driven uncertainty.'
   },
+  'Strategy Screening': {
+    technical: 'The systematic filtration of option combinations using bounded constraints based on user-defined inputs, liquidity constraints, and margin requirements.',
+    simple: 'Searching through thousands of possible option trades to find the ones that actually fit what you want to do.',
+    whyItMatters: 'It prevents you from picking a random trade that doesn\'t match your account size or your view of where the stock is going.'
+  },
+  'Market View': {
+    technical: 'A parameterized directional and volatility forecast that dictates which option structures possess an appropriate Greek exposure.',
+    simple: 'Your opinion on what the stock and its volatility will do over a certain timeframe.',
+    whyItMatters: 'If your market view is wrong, the best options trade in the world will still lose money. Options magnify your market view.'
+  },
+  'Capital Efficiency': {
+    technical: 'The ratio of theoretical maximum profit to the initial margin requirement or capital outlay of the strategy.',
+    simple: 'How much bang you are getting for your buck. If you have to risk $10,000 to make $10, it has terrible capital efficiency.',
+    whyItMatters: 'Allows you to compare strategies with different margin requirements to see which is the best use of your account balance.'
+  },
+  'Thesis Consistency': {
+    technical: 'The analytical verification that a selected strategy\'s payoff profile (Delta/Vega/Theta) aligns with the explicitly stated market view.',
+    simple: 'Making sure the trade you picked actually makes money if your prediction comes true.',
+    whyItMatters: 'Many beginners buy options thinking a stock will go up, but they buy the wrong strike or expiration, so even if the stock goes up, they lose money. Thesis consistency checks for that mismatch.'
+  },
   'Net Edge': {
     technical: 'The modeled gross profit minus estimated transaction costs (commissions, exchange fees, regulatory fees, slippage).',
     simple: 'How much theoretical profit remains after accounting for the cost of executing the trade. If this number is zero or negative, the opportunity may not be worth pursuing.',
