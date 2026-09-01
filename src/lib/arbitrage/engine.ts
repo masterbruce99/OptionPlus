@@ -786,15 +786,16 @@ export function analyzeVerticalBounds(
   const spreadMidpointValue = longMid - shortMid;
 
   // Executable values
-  // Buy long at ask, Sell short at bid
-  const spreadExecutableDebit = longContract.ask - shortContract.bid;
+  // To arbitrage a spread priced above its maximum payoff, we must SELL the spread.
+  // Selling the spread = Sell long contract (at bid), Buy short contract (at ask)
+  const spreadExecutableCredit = longContract.bid - shortContract.ask;
 
   // Violation: if spread value > strike width, there's a no-arbitrage violation
   const midpointViolation = spreadMidpointValue > strikeWidth;
-  const executableViolation = spreadExecutableDebit > strikeWidth;
+  const executableViolation = spreadExecutableCredit > strikeWidth;
 
   // Gross edge from executable violation
-  const grossEdgePerShare = executableViolation ? spreadExecutableDebit - strikeWidth : 0;
+  const grossEdgePerShare = executableViolation ? spreadExecutableCredit - strikeWidth : 0;
   const grossEdge = grossEdgePerShare * 100;
 
   const legs = [
@@ -802,13 +803,13 @@ export function analyzeVerticalBounds(
     makeLeg('BUY', type === 'call' ? 'CALL' : 'PUT', shortContract.bid, shortContract.ask, 1, kShort, expiration),
   ];
 
-  const isInsufficientData = longContract.ask <= 0 || shortContract.bid <= 0;
+  const isInsufficientData = longContract.bid <= 0 || shortContract.ask <= 0;
   const dataQuality: DataQuality = {
     status: isInsufficientData ? 'INSUFFICIENT' : grossEdge > 0 ? 'VALID' : 'VALID',
     issues: isInsufficientData ? ['One or more contracts have no quote'] : [],
     underlyingValid: underlyingPrice > 0,
-    callQuoteValid: longContract.ask > 0,
-    putQuoteValid: shortContract.bid >= 0,
+    callQuoteValid: longContract.bid > 0,
+    putQuoteValid: shortContract.ask > 0,
     contractParamsValid: longContract.expiration === shortContract.expiration,
     interestRateValid: true,
     dividendValid: true,
@@ -851,18 +852,18 @@ export function analyzeVerticalBounds(
     executionAssessment,
     classification,
     assumptions: [
-      `${type.toUpperCase()} debit spread: K1=$${Math.min(kLong, kShort)}, K2=$${Math.max(kLong, kShort)}`,
+      `${type.toUpperCase()} vertical spread: K1=$${Math.min(kLong, kShort)}, K2=$${Math.max(kLong, kShort)}`,
       `Strike width: $${strikeWidth}`,
       `Midpoint spread value: $${spreadMidpointValue.toFixed(4)} — THEORETICAL ONLY`,
-      `Executable debit (buy long at ask, sell short at bid): $${spreadExecutableDebit.toFixed(4)}`,
+      `Executable credit (sell long at bid, buy short at ask): $${spreadExecutableCredit.toFixed(4)}`,
       midpointViolation
         ? `THEORETICAL VIOLATION: Midpoint value $${spreadMidpointValue.toFixed(4)} > strike width $${strikeWidth}`
         : 'No theoretical violation at midpoint',
       executableViolation
-        ? `EXECUTABLE VIOLATION: Spread debit $${spreadExecutableDebit.toFixed(4)} > strike width $${strikeWidth}`
+        ? `EXECUTABLE VIOLATION: Spread credit $${spreadExecutableCredit.toFixed(4)} > strike width $${strikeWidth}`
         : 'No executable violation at bid/ask',
     ],
-    explanation: `VERTICAL SPREAD BOUNDS CHECK\nA ${type} debit spread cannot be worth more than its strike width ($${strikeWidth}) at expiration.\nMidpoint spread value: $${spreadMidpointValue.toFixed(4)} (THEORETICAL)\nExecutable debit: $${spreadExecutableDebit.toFixed(4)}\n${midpointViolation ? 'THEORETICAL VIOLATION DETECTED at midpoint.' : 'No theoretical violation.'}\n${executableViolation ? 'EXECUTABLE VIOLATION DETECTED — the spread debit exceeds the strike width.' : 'No executable violation — midpoint appearance may be a data artifact.'}`,
+    explanation: `VERTICAL SPREAD BOUNDS CHECK\nA ${type} spread cannot be worth more than its strike width ($${strikeWidth}) at expiration.\nMidpoint spread value: $${spreadMidpointValue.toFixed(4)} (THEORETICAL)\nExecutable credit to sell spread: $${spreadExecutableCredit.toFixed(4)}\n${midpointViolation ? 'THEORETICAL VIOLATION DETECTED at midpoint.' : 'No theoretical violation.'}\n${executableViolation ? 'EXECUTABLE VIOLATION DETECTED — the credit received from selling the spread exceeds the maximum potential loss (strike width).' : 'No executable violation — midpoint appearance may be a data artifact.'}`,
     edgeKillers: [
       'The apparent violation may result from stale or crossed quotes',
       'Bid/ask spreads often eliminate midpoint-visible violations',

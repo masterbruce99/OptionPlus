@@ -415,9 +415,19 @@ describe('Vertical Spread Bounds (Module 8)', () => {
     const longCall = makeCall({ strike: 175, bid: 6.00, ask: 7.00 }); // mid=6.5
     const shortCall = makeCall({ strike: 180, bid: 0.50, ask: 1.50 }); // mid=1.0
     // strike width = 5, midpoint spread = 6.5 - 1.0 = 5.5 > 5 → theoretical violation
-    // executable debit = 7.00 - 0.50 = 6.50 > 5 → executable violation also
+    // executable credit = long.bid (6.00) - short.ask (1.50) = 4.50 < 5 → no executable violation
     const result = analyzeVerticalBounds(longCall, shortCall, 178);
     assert(result.assumptions.some(a => a.includes('VIOLATION') || a.includes('violation')));
+    assert.equal(result.grossEdge, 0); // Not executable
+  });
+
+  it('EXECUTABLE VIOLATION when executable credit exceeds strike width', () => {
+    const longCall = makeCall({ strike: 175, bid: 8.00, ask: 9.00 }); 
+    const shortCall = makeCall({ strike: 180, bid: 0.50, ask: 1.50 }); 
+    // strike width = 5
+    // executable credit = 8.00 - 1.50 = 6.50 > 5 → executable violation
+    const result = analyzeVerticalBounds(longCall, shortCall, 178);
+    assert.equal(result.grossEdge, 150); // (6.50 - 5.00) * 100 = 150
   });
 
   it('executable prices differ from midpoint in assumption notes', () => {
