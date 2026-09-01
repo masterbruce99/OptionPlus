@@ -60,7 +60,18 @@ export type TermKey =
   | 'Market View'
   | 'Capital Efficiency'
   | 'Thesis Consistency'
-  | 'Execution Risk';
+  | 'Execution Risk'
+  | 'Event Risk'
+  | 'Catalyst'
+  | 'Earnings Event'
+  | 'Ex-Dividend Date'
+  | 'Event Window'
+  | 'Event Gap'
+  | 'IV Crush'
+  | 'Event Volatility'
+  | 'Event-Expiration Relationship'
+  | 'Event Cluster'
+  | 'Event Exposure';
 
 export interface Explanation {
   technical: string;
@@ -395,6 +406,61 @@ export const educationalDictionary: Record<TermKey, Explanation> = {
   'Execution Risk': {
     technical: 'The risk that a multi-leg strategy cannot be executed simultaneously at the analyzed prices, resulting in partial fills, price movement between legs, or an incomplete hedge.',
     simple: 'Even if the numbers show a profit on paper, you may not be able to buy and sell all legs at exactly those prices at the same time.',
-    whyItMatters: 'Arbitrage strategies require executing multiple legs. If any leg doesn\'t fill (or fills at a worse price), the strategy may become unhedged and expose you to market risk rather than the locked-in theoretical profit.'
+    whyItMatters: 'Arbitrage depends on simultaneous execution. Legging into a trade exposes you to directional risk and can quickly eliminate the expected edge.'
+  },
+  'Event Risk': {
+    technical: 'The risk that a known or unknown event will cause a sudden, discontinuous price movement (gap) in the underlying asset, bypassing stop-loss orders and delta-hedging adjustments.',
+    simple: 'The risk that a big news event (like earnings) makes the stock price jump or crash suddenly overnight, blowing past your safety limits.',
+    whyItMatters: 'Standard risk management assumes you can exit a trade if it goes against you. Event risk means the market might reopen at a price far beyond your exit point, resulting in much larger losses than planned.'
+  },
+  'Catalyst': {
+    technical: 'A specific event or news item that triggers a reassessment of an asset\'s valuation, often leading to a significant increase in volatility or a directional price move.',
+    simple: 'A major upcoming event that could make the stock price move significantly (e.g., earnings, FDA approvals, economic data).',
+    whyItMatters: 'Catalysts are the engines of options pricing. Options expiring after a known catalyst will be much more expensive than options expiring before it.'
+  },
+  'Earnings Event': {
+    technical: 'A quarterly corporate disclosure of financial performance. It represents a binary event where the outcome is unknown, leading to elevated implied volatility in near-term options prior to the release.',
+    simple: 'When a company announces how much money it made. The stock often moves violently on this day.',
+    whyItMatters: 'Earnings are the most common source of event risk. Holding short options through an earnings event carries significant risk of a gap against your position.'
+  },
+  'Ex-Dividend Date': {
+    technical: 'The date on which a stock trades without the value of its next dividend payment. The stock price typically drops by the dividend amount at the market open.',
+    simple: 'The day the stock price automatically drops by the dividend amount. You must own the stock before this date to get the dividend.',
+    whyItMatters: 'If you hold short calls near the ex-dividend date, you face high assignment risk because call buyers will exercise their options early to capture the dividend.'
+  },
+  'Event Window': {
+    technical: 'A specified timeframe around a catalyst during which pre-event volatility expansion, the event gap itself, and post-event volatility crush occur.',
+    simple: 'The few days before and after a major news event.',
+    whyItMatters: 'Understanding the window helps you decide whether to trade the run-up to the event, the event itself, or the aftermath.'
+  },
+  'Event Gap': {
+    technical: 'A discontinuous change in the price of an asset between trading sessions, caused by news released while the market is closed.',
+    simple: 'When a stock closes at $100 and opens the next morning at $80 or $120. A major event can produce a large price change between trading periods, making normal stop-loss or expected intraday behavior less reliable.',
+    whyItMatters: 'Event gaps are the primary reason short premium strategies are dangerous around earnings. You cannot stop out of an overnight gap.'
+  },
+  'IV Crush': {
+    technical: 'A rapid contraction in implied volatility immediately following a known binary event (like earnings), as the uncertainty premium is priced out of the options.',
+    simple: 'Implied volatility can decrease after a major known event when uncertainty associated with the event is removed from option pricing. The option price drops sharply even if the stock doesn\'t move.',
+    whyItMatters: 'Buying options right before an event means you pay peak IV. If the stock doesn\'t move far enough to offset the IV crush, you will lose money even if you guessed the direction right.'
+  },
+  'Event Volatility': {
+    technical: 'The isolated component of implied volatility attributable specifically to an upcoming event, often calculated by comparing the IV of the event-capturing expiration to the adjacent expirations.',
+    simple: 'The extra premium added to the option specifically because an event is happening before expiration.',
+    whyItMatters: 'It tells you exactly how much the market is charging for the risk of the event itself.'
+  },
+  'Event-Expiration Relationship': {
+    technical: 'The chronological sequencing of an option\'s expiration relative to a catalyst date, determining whether the contract prices in the event\'s variance.',
+    simple: 'Does the option expire before the event, on the event date, or after the event?',
+    whyItMatters: 'If you want to trade an event, you must buy an option that expires AFTER it. If you want to avoid an event, buy one that expires BEFORE it.'
+  },
+  'Event Cluster': {
+    technical: 'The occurrence of multiple distinct catalysts within a narrow timeframe (e.g., earnings followed immediately by a Fed meeting).',
+    simple: 'When a stock faces several big news events in a short period of time.',
+    whyItMatters: 'Clusters make it very difficult to isolate which event is driving option pricing, and increase the chance of sequential volatile moves.'
+  },
+  'Event Exposure': {
+    technical: 'The aggregate Greek risk (Delta, Gamma, Vega) of a portfolio of positions that span an upcoming event date.',
+    simple: 'How much money you could win or lose across your entire account if an upcoming event causes a huge price swing.',
+    whyItMatters: 'You might not realize that 5 different trades all rely on the same stock going up during its earnings report. Event exposure reveals this concentrated risk.'
   }
 };

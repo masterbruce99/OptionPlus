@@ -15,6 +15,7 @@ import { ActivityScanner } from './ActivityScanner';
 import { ChainIntelligence } from './chain-intelligence/ChainIntelligence';
 import { OptionContract } from '../lib/providers/MarketDataProvider';
 import { TradeWorkspace } from './workspace/TradeWorkspace';
+import { EventWorkspace } from './events/EventWorkspace';
 
 export default function Dashboard() {
   const [symbol, setSymbol] = useState('');
@@ -30,7 +31,7 @@ export default function Dashboard() {
   const [selectedOption, setSelectedOption] = useState<OptionContract | null>(null);
   
   // Phase 3 & later State
-  const [activeTab, setActiveTab] = useState<'workspace' | 'chain' | 'chain-intelligence' | 'analyzer' | 'arbitrage' | 'opportunities' | 'journal' | 'backtest' | 'datacenter' | 'portfolio' | 'probability' | 'trade-setups' | 'activity'>('workspace');
+  const [activeTab, setActiveTab] = useState<'workspace' | 'chain' | 'chain-intelligence' | 'analyzer' | 'arbitrage' | 'opportunities' | 'journal' | 'backtest' | 'datacenter' | 'portfolio' | 'probability' | 'trade-setups' | 'activity' | 'events'>('workspace');
 
   const searchSymbol = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -268,6 +269,12 @@ export default function Dashboard() {
           >
             Activity Scanner
           </button>
+          <button 
+            onClick={() => setActiveTab('events')}
+            style={{ padding: '10px 20px', backgroundColor: activeTab === 'events' ? 'var(--accent-primary)' : 'var(--bg-tertiary)', color: activeTab === 'events' ? '#fff' : 'var(--text-primary)', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
+          >
+            Events & Catalysts
+          </button>
         </div>
       )}
 
@@ -426,6 +433,12 @@ export default function Dashboard() {
       {activeTab === 'activity' && (
         <div className="animate-fade-in">
           <ActivityScanner quote={quote} chain={chain} />
+        </div>
+      )}
+
+      {activeTab === 'events' && (
+        <div className="animate-fade-in">
+          <EventWorkspace />
         </div>
       )}
     </div>

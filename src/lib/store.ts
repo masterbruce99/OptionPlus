@@ -6,7 +6,7 @@ const generateId = () => Date.now().toString(36) + Math.random().toString(36).sl
 
 export interface WatchlistItem {
   id: string;
-  type: 'symbol' | 'option' | 'structure' | 'expiration';
+  type: 'symbol' | 'option' | 'structure' | 'expiration' | 'event';
   symbol: string;
   description: string;
   addedAt: number;
@@ -107,6 +107,53 @@ export function clearSnapshots(): void {
   if (typeof window !== 'undefined') localStorage.removeItem(SNAPSHOTS_KEY);
 }
 
+// --- Module 36, 37: Event Snapshots (Phase 15) ---
+
+export interface EventSnapshot {
+  id: string;
+  timestamp: number;
+  eventId: string;
+  eventDate: string | null;
+  marketPrices: Record<string, { bid: number; ask: number; last: number; iv: number }>;
+  expectedMove?: number;
+  portfolioExposure?: unknown;
+  activity?: unknown;
+}
+
+const EVENT_SNAPSHOTS_KEY = 'optionplus_event_snapshots';
+
+export function getEventSnapshots(): EventSnapshot[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const data = localStorage.getItem(EVENT_SNAPSHOTS_KEY);
+    return data ? JSON.parse(data) : [];
+  } catch (e) {
+    console.error('Failed to parse event snapshots from localStorage', e);
+    return [];
+  }
+}
+
+export function saveEventSnapshot(snapshot: Omit<EventSnapshot, 'id' | 'timestamp'>): EventSnapshot {
+  const snapshots = getEventSnapshots();
+  const newSnapshot: EventSnapshot = {
+    ...snapshot,
+    id: generateId(),
+    timestamp: Date.now(),
+  };
+  snapshots.push(newSnapshot);
+  if (typeof window !== 'undefined') localStorage.setItem(EVENT_SNAPSHOTS_KEY, JSON.stringify(snapshots));
+  return newSnapshot;
+}
+
+export function getEventSnapshotById(id: string): EventSnapshot | null {
+  return getEventSnapshots().find(s => s.id === id) || null;
+}
+
+export function deleteEventSnapshot(id: string): void {
+  const snapshots = getEventSnapshots().filter(s => s.id !== id);
+  if (typeof window !== 'undefined') localStorage.setItem(EVENT_SNAPSHOTS_KEY, JSON.stringify(snapshots));
+}
+
 // --- Module 16-17: Advanced Trade Journal (Phase 13) ---
 
 export type MarketViewDirection = 'bullish' | 'bearish' | 'neutral';
@@ -183,6 +230,11 @@ export interface AdvancedJournalEntry {
 
   // Post-Mortem (Modules 11-18)
   postMortem?: TradePostMortem;
+
+  // Event Context (Phase 15, Module 38)
+  eventId?: string;
+  eventThesis?: string;
+  eventExposure?: unknown;
 
   status: JournalStatus;
   createdAt: number;
