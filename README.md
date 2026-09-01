@@ -235,3 +235,16 @@ Phase 11 implements an **Options Market Scanner & Unusual Activity Intelligence 
 - **Activity Classification:** Contracts are scored objectively (0-100) based on Volume/OI ratio, total volume, and aggregate premium. They are classified as `NORMAL ACTIVITY`, `ELEVATED ACTIVITY`, `UNUSUAL ACTIVITY`, or `HIGHLY UNUSUAL ACTIVITY`. No directional assumptions (`BULLISH/BEARISH`) are applied.
 - **Data Quality Score:** The engine transparently penalizes its own activity score when required baseline data is missing, ensuring users understand the confidence level of the signal.
 - **Educational Explanations:** The UI includes prominent sections for "What This Means" and "What This Does NOT Prove" to prevent beginners from blindly mirroring options volume.
+
+## Phase 12 — Advanced Options Chain Intelligence & Contract Analysis
+
+### Overview
+Phase 12 builds an advanced, interactive Options Chain Intelligence engine that helps users understand the option chain as a complete market structure. It evaluates chain quality, liquidity, Greeks distribution, and provides interactive simulation capabilities.
+
+### Implemented Modules & Methodology
+- **Chain Quality Assessment:** Assesses the completeness of market data, open interest dispersion, and overall chain health to ensure reliable insights.
+- **Strike Map & Liquidity:** Visualizes open interest, volume, and bid/ask spreads across all strikes, highlighting the most heavily traded zones and the market's expected move boundaries.
+- **Greek Curves:** Plots Delta, Gamma, Theta, and Vega across strikes, clearly demonstrating non-linear risk, gamma clustering, and time decay effects for the current expiration.
+- **Volatility Analysis:** Visualizes IV Smile/Skew across strikes and IV Term Structure across expirations to help identify rich/cheap contracts and future market expectations.
+- **Contract Scorecard & Hypothetical Simulation:** Allows users to select any contract, evaluate its quality score (combining liquidity, spread, and data quality metrics), and instantly simulate its impact on a hypothetical portfolio's total Greeks and capital requirements.
+- **Read the Chain Workflow:** Guides beginners through the analytical process step-by-step, teaching them how to interpret the visualizations without giving directional recommendations.

@@ -12,6 +12,7 @@ import { PortfolioScanner } from './PortfolioScanner';
 import ProbabilityScanner from './ProbabilityScanner';
 import TradeSetups from './TradeSetups';
 import { ActivityScanner } from './ActivityScanner';
+import { ChainIntelligence } from './chain-intelligence/ChainIntelligence';
 import { OptionContract } from '../lib/providers/MarketDataProvider';
 
 export default function Dashboard() {
@@ -28,7 +29,7 @@ export default function Dashboard() {
   const [selectedOption, setSelectedOption] = useState<OptionContract | null>(null);
   
   // Phase 3 & later State
-  const [activeTab, setActiveTab] = useState<'chain' | 'analyzer' | 'arbitrage' | 'opportunities' | 'journal' | 'backtest' | 'datacenter' | 'portfolio' | 'probability' | 'trade-setups' | 'activity'>('chain');
+  const [activeTab, setActiveTab] = useState<'chain' | 'chain-intelligence' | 'analyzer' | 'arbitrage' | 'opportunities' | 'journal' | 'backtest' | 'datacenter' | 'portfolio' | 'probability' | 'trade-setups' | 'activity'>('chain');
 
   const searchSymbol = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -195,6 +196,12 @@ export default function Dashboard() {
             Options Chain
           </button>
           <button 
+            onClick={() => setActiveTab('chain-intelligence')}
+            style={{ padding: '10px 20px', backgroundColor: activeTab === 'chain-intelligence' ? 'var(--accent-primary)' : 'var(--bg-tertiary)', color: activeTab === 'chain-intelligence' ? '#fff' : 'var(--text-primary)', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
+          >
+            Chain Intelligence
+          </button>
+          <button 
             onClick={() => setActiveTab('analyzer')}
             style={{ padding: '10px 20px', backgroundColor: activeTab === 'analyzer' ? 'var(--accent-primary)' : 'var(--bg-tertiary)', color: activeTab === 'analyzer' ? '#fff' : 'var(--text-primary)', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
           >
@@ -286,6 +293,29 @@ export default function Dashboard() {
             underlyingPrice={quote?.price || 0}
             isBeginnerMode={isBeginnerMode}
             onSelectOption={setSelectedOption}
+          />
+        </div>
+      )}
+
+      {expirations.length > 0 && activeTab === 'chain-intelligence' && (
+        <div className="animate-fade-in">
+          <div className="card" style={{ marginBottom: '1rem', display: 'flex', gap: '1rem', alignItems: 'center' }}>
+            <label style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>Analyze Expiration:</label>
+            <select 
+              value={selectedExp} 
+              onChange={handleExpChange}
+              style={{ padding: '8px', background: 'var(--bg-tertiary)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', borderRadius: '4px' }}
+            >
+              {expirations.map(exp => (
+                <option key={exp} value={exp}>{exp}</option>
+              ))}
+            </select>
+          </div>
+          <ChainIntelligence 
+            symbol={quote?.symbol || ''}
+            chain={chain}
+            expirations={expirations}
+            underlyingPrice={quote?.price || 0}
           />
         </div>
       )}
