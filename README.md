@@ -88,3 +88,105 @@ The application enforces a strict "Real Data Only" policy.
    git commit -m "feat: your meaningful change"
    git push origin main
    ```
+
+## Phase 4 — Arbitrage & Pricing-Dislocation Engine
+
+### Overview
+
+Phase 4 implements an **analytical arbitrage scanner** for identifying potential pricing dislocations. It is **not** an automated trading system and cannot place orders.
+
+### Implemented Analyses
+
+#### Put-Call Parity
+Formula: `C - P = S - PV(K) - PV(D)`
+
+Where:
+- `C` = call price, `P` = put price, `S` = stock price
+- `PV(K)` = present value of strike (discounted at risk-free rate)
+- `PV(D)` = present value of dividends (continuous approximation)
+
+**Executable analysis**: BUY uses ASK price; SELL uses BID price. The midpoint is displayed separately as *THEORETICAL MIDPOINT ANALYSIS* and is never classified as executable arbitrage.
+
+#### Conversion
+Structure: Long Stock + Long Put + Short Call (same strike/expiration).
+
+At expiration, the position value equals exactly the strike price. The gross edge = `call_bid - put_ask + strike - stock_price`. Financing cost on the long stock reduces the net edge.
+
+#### Reversal
+Structure: Short Stock + Long Call + Short Put (same strike/expiration).
+
+The economic opposite of a conversion. **Critical**: short stock requires borrowing shares. Borrow cost is never assumed to be zero — it is marked `UNCONFIGURED` until explicitly set.
+
+#### Synthetic Stock
+Long Call + Short Put at same strike/expiration replicates stock exposure. The cost difference vs. actual stock exposure is evaluated using executable bid/ask prices, adjusted for interest rate and dividend data.
+
+#### Box Spread
+Four legs: Bull Call Spread + Bear Put Spread at the same strikes.
+
+The box always pays exactly `K2 - K1` at expiration. This is a **financing transaction**, not a risk-free trade. The implied annualized financing rate is computed and compared to the benchmark T-Bill rate.
+
+#### Vertical Spread Bounds
+A call (or put) debit spread cannot be worth more than its strike width at expiration. The scanner checks for violations at both midpoint (theoretical) and executable (bid/ask) levels. Midpoint violations are clearly distinguished from executable violations.
+
+### Bid/Ask Treatment
+
+- **All executable analysis uses**: BUY at ASK, SELL at BID
+- **Midpoints** are computed and displayed as `THEORETICAL MIDPOINT ANALYSIS` only
+- The system never classifies a midpoint-profitable trade as executable arbitrage
+
+### Transaction Cost Treatment
+
+Estimated costs per contract:
+- Commission (2× per leg: open + close): `$0.65/leg`
+- Exchange fees: `$0.30/leg`
+- Regulatory fees: `$0.03/leg`
+- Slippage: `0.5%` of premium transacted (configurable)
+- Financing: `riskFreeRate × capital × (DTE/365)`
+- Borrow cost (short stock): `UNCONFIGURED by default` — net edge is `UNDETERMINED` until configured
+
+**Rule**: Unknown cost ≠ zero cost. If any required cost cannot be determined, `Net Edge = UNDETERMINED`.
+
+### Financing
+
+Financing is calculated as: `capital_requirement × risk_free_rate × (dte / 365)`.
+
+The risk-free rate is fetched from the U.S. Treasury FiscalData API (T-Bill average rate). If unavailable, the rate is marked `UNAVAILABLE` and calculations are flagged.
+
+### Dividends
+
+Dividend data is never silently substituted with zero. Possible states:
+- `REAL_DATA`: provided by the market data provider
+- `USER_INPUT`: manually entered by the user
+- `UNAVAILABLE`: not provided — calculations are flagged
+
+### Liquidity
+
+Each arbitrage pair is assessed for:
+- Volume < 10 → penalized
+- Open interest < 100 → penalized  
+- Bid/ask spread > 10% of midpoint → flagged as `NOT_EXECUTABLE`
+
+### Stale Quote Protection
+
+Quote timestamps are evaluated when available. Maximum acceptable age is configurable (default: 5 minutes). If timestamp is unavailable, the candidate is flagged as `EXECUTION_UNVERIFIED`.
+
+### Opportunity Classifications
+
+| Classification | Meaning |
+|---|---|
+| `NO_DISLOCATION` | No apparent pricing imbalance |
+| `THEORETICAL_DISLOCATION` | Midpoint-visible only; not executable |
+| `POTENTIAL_ARBITRAGE` | Executable gross edge positive; costs unconfigured |
+| `POSITIVE_AFTER_CONFIGURED_COSTS` | Net edge positive after all configured costs |
+| `EXECUTION_UNCERTAIN` | Wide spreads, stale quotes, or low liquidity |
+| `INSUFFICIENT_DATA` | Required data missing |
+
+### Known Limitations
+
+- **Early assignment**: American-style options can be exercised before expiration, disrupting the fixed-payoff structure of conversions, reversals, and box spreads.
+- **Borrow cost**: Reversal and short-stock strategies require share borrowing; actual rates can be very high for hard-to-borrow names.
+- **Multi-leg execution risk**: Simultaneous fills across 2–4 legs may be impossible at the analyzed prices.
+- **Dividend accuracy**: Continuous dividend yield approximation may differ from discrete dividend payments.
+- **Rate freshness**: Treasury bill rate is cached for 1 hour; intraday rate changes are not reflected.
+- **Commissions**: Default cost estimates may not match your broker's actual schedule.
+- **No order execution**: This phase is analytical only. No brokerage integration is provided.

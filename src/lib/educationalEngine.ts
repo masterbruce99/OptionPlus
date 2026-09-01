@@ -38,7 +38,19 @@ export type TermKey =
   | 'Data Quality'
   | 'Execution Score'
   | 'Quality Score'
-  | 'Market Regime';
+  | 'Market Regime'
+  | 'Arbitrage'
+  | 'No-Arbitrage Relationship'
+  | 'Put-Call Parity'
+  | 'Synthetic Stock'
+  | 'Conversion'
+  | 'Reversal'
+  | 'Box Spread'
+  | 'Vertical Spread Bounds'
+  | 'Slippage'
+  | 'Financing'
+  | 'Borrow Cost'
+  | 'Execution Risk';
 
 export interface Explanation {
   technical: string;
@@ -264,5 +276,65 @@ export const educationalDictionary: Record<TermKey, Explanation> = {
     technical: 'A classification of the current market environment based on trend direction (price change) and volatility level (ATM implied volatility).',
     simple: 'Is the market going up, going down, or staying flat? Is volatility high, low, or moderate? This gives you a quick read of current conditions.',
     whyItMatters: 'Different strategies work better in different regimes. Understanding the current environment helps you evaluate whether a strategy is appropriate.'
+  },
+  'Arbitrage': {
+    technical: 'The simultaneous purchase and sale of related instruments to exploit a pricing discrepancy between them. In efficient markets, true arbitrage is rare and self-correcting.',
+    simple: 'Finding a price mismatch between related assets and trading both sides to profit from the difference.',
+    whyItMatters: 'Understanding arbitrage helps you recognize whether a perceived opportunity is real or just an artifact of stale quotes, wide bid/ask spreads, or model assumptions.'
+  },
+  'No-Arbitrage Relationship': {
+    technical: 'A mathematical constraint that must hold between related securities in a frictionless market. If violated in theory, rational actors would trade to eliminate the discrepancy.',
+    simple: 'A pricing rule that says "if A and B are equivalent, they should cost the same." If they don\'t, there\'s a possible opportunity — but real trades have friction that often explains the gap.',
+    whyItMatters: 'Textbook violations almost never survive bid/ask spreads plus transaction costs. Understanding these relationships helps you spot when prices are genuinely unusual.'
+  },
+  'Put-Call Parity': {
+    technical: 'The relationship C - P = S - PV(K) - PV(D), where C=call price, P=put price, S=stock price, PV(K)=present value of strike, PV(D)=present value of dividends.',
+    simple: 'A call and a put at the same strike should be priced so that a combined position gives the same payoff as just holding the stock. If they\'re not, there\'s a theoretical imbalance.',
+    whyItMatters: 'Put-call parity violations in real markets are usually eliminated by bid/ask spreads and transaction costs. Seeing one in your scanner means the midpoint prices appear inconsistent, but the executable prices may show no profit.'
+  },
+  'Synthetic Stock': {
+    technical: 'A position created by buying a call and selling a put at the same strike and expiration. At expiration, it replicates owning 100 shares of the underlying.',
+    simple: 'You can mimic owning a stock using options — buy a call and sell a put at the same price and date. If priced correctly, the cost should equal the stock price adjusted for interest and dividends.',
+    whyItMatters: 'If the synthetic costs significantly less or more than the stock, it suggests a pricing discrepancy. But short put requires margin and has downside risk identical to owning the stock.'
+  },
+  'Conversion': {
+    technical: 'An arbitrage structure consisting of long stock, long put, and short call at the same strike and expiration. At expiration, the value is exactly the strike price regardless of stock movement.',
+    simple: 'You buy the stock, buy a put for downside protection, and sell a call to offset the cost. If you collect more than the financing cost, there\'s theoretical profit.',
+    whyItMatters: 'Conversions are used by market makers to lock in pricing discrepancies. For individual traders, the financing cost of holding the stock usually eliminates any apparent edge.'
+  },
+  'Reversal': {
+    technical: 'The opposite of a conversion: short stock, long call, short put at the same strike and expiration. Requires borrowing shares, so borrow cost is critical.',
+    simple: 'You short-sell the stock, buy a call, and sell a put. If the income exceeds the cost of borrowing the stock and buying the call, there may be profit.',
+    whyItMatters: 'Reversals are primarily executed by market makers or institutions. Stock borrow costs can be very high for hard-to-borrow names, often eliminating the apparent edge entirely.'
+  },
+  'Box Spread': {
+    technical: 'A four-leg options strategy combining a bull call spread and a bear put spread at the same strikes. Pays exactly K2-K1 at expiration regardless of the stock price. The implied rate is a financing rate.',
+    simple: 'A box spread is like lending money using options — you pay less today and receive a fixed amount at expiration. The \'profit\' is really just a below-market financing rate, not a guaranteed windfall.',
+    whyItMatters: 'Retail traders occasionally see box spreads that appear profitable. In practice, commissions on all four legs, early assignment risk on the short legs, and margin requirements usually eliminate the edge.'
+  },
+  'Vertical Spread Bounds': {
+    technical: 'A debit spread cannot be worth more than its strike width (K2-K1) at expiration. If the market price violates this, it\'s a no-arbitrage violation.',
+    simple: 'If you buy a spread with a $5 strike width, you can never make more than $5 per share. If the market is quoting the spread above $5, either the quotes are stale/crossed or there\'s a real discrepancy.',
+    whyItMatters: 'These apparent violations are almost always caused by stale or crossed quotes. Verifying with current bid/ask prices usually shows no executable violation.'
+  },
+  'Slippage': {
+    technical: 'The difference between the expected execution price and the actual fill price, caused by market impact, partial fills, or price movement between order submission and fill.',
+    simple: 'The cost of actually getting your trade done. In fast markets or illiquid options, you might pay more (or receive less) than the quoted price.',
+    whyItMatters: 'Slippage can eliminate an apparent arbitrage edge, especially on multi-leg strategies where each leg may slip slightly in an unfavorable direction.'
+  },
+  'Financing': {
+    technical: 'The opportunity cost or explicit cost of capital used in a position. For long stock positions, this is the cost of borrowing money or forgoing the risk-free rate on tied-up capital.',
+    simple: 'Money tied up in a trade could be earning interest elsewhere. That missed interest is a real cost that must be subtracted from any apparent profit.',
+    whyItMatters: 'Arbitrage strategies often tie up large amounts of capital. The financing cost over the holding period (especially for far-dated options) can easily exceed the gross edge.'
+  },
+  'Borrow Cost': {
+    technical: 'The cost to borrow shares for a short sale, charged as an annualized percentage of the stock\'s market value by the prime broker. Hard-to-borrow stocks can have very high borrow rates.',
+    simple: 'When you short a stock, you have to borrow the shares from someone. They charge a fee for this, which can range from nearly zero to many percent per year for difficult-to-borrow names.',
+    whyItMatters: 'Reversals and other short-stock arbitrage strategies require borrowing shares. An unknown borrow cost makes the net edge impossible to determine — which is why it\'s never assumed to be zero.'
+  },
+  'Execution Risk': {
+    technical: 'The risk that a multi-leg strategy cannot be executed simultaneously at the analyzed prices, resulting in partial fills, price movement between legs, or an incomplete hedge.',
+    simple: 'Even if the numbers show a profit on paper, you may not be able to buy and sell all legs at exactly those prices at the same time.',
+    whyItMatters: 'Arbitrage strategies require executing multiple legs. If any leg doesn\'t fill (or fills at a worse price), the strategy may become unhedged and expose you to market risk rather than the locked-in theoretical profit.'
   }
 };

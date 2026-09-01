@@ -5,6 +5,7 @@ import OptionDetailPanel from './OptionDetailPanel';
 import StrategyAnalyzer from './StrategyAnalyzer';
 import OpportunityDashboard from './OpportunityDashboard';
 import TradeJournal from './TradeJournal';
+import ArbitrageScanner from './ArbitrageScanner';
 import { OptionContract } from '@/lib/providers/MarketDataProvider';
 
 export default function Dashboard() {
@@ -21,7 +22,7 @@ export default function Dashboard() {
   const [selectedOption, setSelectedOption] = useState<OptionContract | null>(null);
   
   // Phase 3 State
-  const [activeTab, setActiveTab] = useState<'chain' | 'analyzer' | 'opportunities' | 'journal'>('chain');
+  const [activeTab, setActiveTab] = useState<'chain' | 'analyzer' | 'arbitrage' | 'opportunities' | 'journal'>('chain');
 
   const searchSymbol = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -200,6 +201,12 @@ export default function Dashboard() {
             Opportunities
           </button>
           <button 
+            onClick={() => setActiveTab('arbitrage')}
+            style={{ padding: '10px 20px', backgroundColor: activeTab === 'arbitrage' ? 'var(--accent-primary)' : 'var(--bg-tertiary)', color: activeTab === 'arbitrage' ? '#fff' : 'var(--text-primary)', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
+          >
+            Arbitrage
+          </button>
+          <button 
             onClick={() => setActiveTab('journal')}
             style={{ padding: '10px 20px', backgroundColor: activeTab === 'journal' ? 'var(--accent-primary)' : 'var(--bg-tertiary)', color: activeTab === 'journal' ? '#fff' : 'var(--text-primary)', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
           >
@@ -272,6 +279,15 @@ export default function Dashboard() {
             quote={quote}
             chain={chain}
             expiration={selectedExp}
+          />
+        </div>
+      )}
+
+      {expirations.length > 0 && activeTab === 'arbitrage' && (
+        <div className="animate-fade-in">
+          <ArbitrageScanner
+            chain={chain}
+            underlyingPrice={quote?.price || 0}
           />
         </div>
       )}
