@@ -1,6 +1,8 @@
 'use client';
 import { useState } from 'react';
-import EducationalTooltip from './EducationalTooltip';
+import OptionChainTable from './OptionChainTable';
+import OptionDetailPanel from './OptionDetailPanel';
+import { OptionContract } from '@/lib/providers/MarketDataProvider';
 
 export default function Dashboard() {
   const [symbol, setSymbol] = useState('');
@@ -8,8 +10,12 @@ export default function Dashboard() {
   const [quote, setQuote] = useState<any>(null);
   const [expirations, setExpirations] = useState<string[]>([]);
   const [selectedExp, setSelectedExp] = useState<string>('');
-  const [chain, setChain] = useState<any[]>([]);
+  const [chain, setChain] = useState<OptionContract[]>([]);
   const [error, setError] = useState('');
+  
+  // Phase 2 State
+  const [isBeginnerMode, setIsBeginnerMode] = useState(true);
+  const [selectedOption, setSelectedOption] = useState<OptionContract | null>(null);
 
   const searchSymbol = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,6 +26,7 @@ export default function Dashboard() {
     setQuote(null);
     setExpirations([]);
     setChain([]);
+    setSelectedOption(null);
 
     try {
       // 1. Fetch Quote
@@ -55,6 +62,7 @@ export default function Dashboard() {
       if (chainRes.ok) {
         const chainData = await chainRes.json();
         setChain(chainData);
+        setSelectedOption(null); // Reset selection on new chain
       }
     } catch (err: any) {
       setError('Failed to fetch option chain.');
@@ -71,45 +79,97 @@ export default function Dashboard() {
 
   return (
     <div>
-      <form onSubmit={searchSymbol} className="card flex items-center gap-4" style={{ marginBottom: '2rem' }}>
-        <input 
-          type="text" 
-          placeholder="Enter Symbol (e.g. AAPL)" 
-          value={symbol}
-          onChange={(e) => setSymbol(e.target.value)}
-          style={{ 
-            padding: '10px', 
-            borderRadius: '4px', 
-            border: '1px solid var(--border-color)', 
-            background: 'var(--bg-tertiary)',
-            color: 'var(--text-primary)',
-            fontSize: '1rem'
-          }}
-        />
-        <button 
-          type="submit" 
-          style={{
-            padding: '10px 20px',
-            backgroundColor: 'var(--accent-primary)',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '4px',
-            fontWeight: 'bold'
-          }}
-        >
-          {loading ? 'Loading...' : 'Search'}
-        </button>
-      </form>
+      <div className="card flex items-center justify-between" style={{ marginBottom: '2rem' }}>
+        <form onSubmit={searchSymbol} className="flex items-center gap-4">
+          <input 
+            type="text" 
+            placeholder="Enter Symbol (e.g. AAPL)" 
+            value={symbol}
+            onChange={(e) => setSymbol(e.target.value)}
+            style={{ 
+              padding: '10px', 
+              borderRadius: '4px', 
+              border: '1px solid var(--border-color)', 
+              background: 'var(--bg-tertiary)',
+              color: 'var(--text-primary)',
+              fontSize: '1rem'
+            }}
+          />
+          <button 
+            type="submit" 
+            style={{
+              padding: '10px 20px',
+              backgroundColor: 'var(--accent-primary)',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '4px',
+              fontWeight: 'bold',
+              cursor: 'pointer'
+            }}
+          >
+            {loading ? 'Loading...' : 'Search'}
+          </button>
+        </form>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <span style={{ fontWeight: isBeginnerMode ? 'bold' : 'normal' }}>Beginner</span>
+          <label style={{ position: 'relative', display: 'inline-block', width: '40px', height: '20px' }}>
+            <input 
+              type="checkbox" 
+              checked={!isBeginnerMode}
+              onChange={() => setIsBeginnerMode(!isBeginnerMode)}
+              style={{ opacity: 0, width: 0, height: 0 }} 
+            />
+            <span style={{
+              position: 'absolute',
+              cursor: 'pointer',
+              top: 0, left: 0, right: 0, bottom: 0,
+              backgroundColor: isBeginnerMode ? 'var(--border-color)' : 'var(--accent-primary)',
+              borderRadius: '20px',
+              transition: '.4s'
+            }}></span>
+            <span style={{
+              position: 'absolute',
+              content: '""',
+              height: '16px',
+              width: '16px',
+              left: isBeginnerMode ? '2px' : '22px',
+              bottom: '2px',
+              backgroundColor: 'white',
+              borderRadius: '50%',
+              transition: '.4s'
+            }}></span>
+          </label>
+          <span style={{ fontWeight: !isBeginnerMode ? 'bold' : 'normal' }}>Advanced</span>
+        </div>
+      </div>
 
       {error && <div className="card text-danger" style={{ marginBottom: '2rem' }}>{error}</div>}
 
       {quote && (
         <div className="card animate-fade-in" style={{ marginBottom: '2rem' }}>
-          <h2>{quote.symbol} - ${quote.price.toFixed(2)}</h2>
-          <p className={quote.change >= 0 ? 'text-success' : 'text-danger'}>
-            {quote.change >= 0 ? '+' : ''}{quote.change.toFixed(2)} ({quote.changePercentage.toFixed(2)}%)
-          </p>
-          <p className="text-muted" style={{ marginTop: '0.5rem' }}>Volume: {quote.volume}</p>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <h2>{quote.symbol} - ${quote.price.toFixed(2)}</h2>
+              <p className={quote.change >= 0 ? 'text-success' : 'text-danger'}>
+                {quote.change >= 0 ? '+' : ''}{quote.change.toFixed(2)} ({quote.changePercentage.toFixed(2)}%)
+              </p>
+            </div>
+            <div style={{ textAlign: 'right' }}>
+              <p className="text-muted" style={{ marginTop: '0.5rem' }}>Volume: {quote.volume}</p>
+              <p className="text-muted" style={{ fontSize: '0.8rem' }}>Data Status: Real-time (subject to provider)</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {selectedOption && quote && (
+        <div style={{ marginBottom: '2rem' }}>
+          <OptionDetailPanel 
+            option={selectedOption} 
+            underlyingPrice={quote.price} 
+            onClose={() => setSelectedOption(null)} 
+          />
         </div>
       )}
 
@@ -132,44 +192,17 @@ export default function Dashboard() {
                 <option key={exp} value={exp}>{exp}</option>
               ))}
             </select>
+            <span className="text-muted" style={{ fontSize: '0.8rem', marginLeft: 'auto' }}>
+              Click any bid, ask, or last price to view option details.
+            </span>
           </div>
 
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-              <thead>
-                <tr style={{ borderBottom: '1px solid var(--border-color)' }}>
-                  <th style={{ padding: '12px' }}>Type</th>
-                  <th style={{ padding: '12px' }}><EducationalTooltip term="Strike Price">Strike</EducationalTooltip></th>
-                  <th style={{ padding: '12px' }}><EducationalTooltip term="Bid">Bid</EducationalTooltip></th>
-                  <th style={{ padding: '12px' }}><EducationalTooltip term="Ask">Ask</EducationalTooltip></th>
-                  <th style={{ padding: '12px' }}><EducationalTooltip term="Volume">Volume</EducationalTooltip></th>
-                  <th style={{ padding: '12px' }}><EducationalTooltip term="Open Interest">OI</EducationalTooltip></th>
-                  <th style={{ padding: '12px' }}><EducationalTooltip term="Implied Volatility">IV</EducationalTooltip></th>
-                  <th style={{ padding: '12px' }}><EducationalTooltip term="Delta">Delta</EducationalTooltip></th>
-                </tr>
-              </thead>
-              <tbody>
-                {chain.length > 0 ? chain.map((opt, i) => (
-                  <tr key={i} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                    <td style={{ padding: '12px', fontWeight: 'bold', color: opt.type === 'call' ? 'var(--success)' : 'var(--danger)' }}>
-                      <EducationalTooltip term={opt.type === 'call' ? 'Call' : 'Put'}>{opt.type.toUpperCase()}</EducationalTooltip>
-                    </td>
-                    <td style={{ padding: '12px' }}>{opt.strike}</td>
-                    <td style={{ padding: '12px' }}>${opt.bid}</td>
-                    <td style={{ padding: '12px' }}>${opt.ask}</td>
-                    <td style={{ padding: '12px' }}>{opt.volume}</td>
-                    <td style={{ padding: '12px' }}>{opt.openInterest}</td>
-                    <td style={{ padding: '12px' }}>{(opt.impliedVolatility * 100).toFixed(2)}%</td>
-                    <td style={{ padding: '12px' }}>{opt.greeks?.delta ? opt.greeks.delta.toFixed(3) : '-'}</td>
-                  </tr>
-                )) : (
-                  <tr>
-                    <td colSpan={8} style={{ padding: '12px', textAlign: 'center' }}>No options found for this expiration.</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+          <OptionChainTable 
+            chain={chain} 
+            underlyingPrice={quote?.price || 0}
+            isBeginnerMode={isBeginnerMode}
+            onSelectOption={setSelectedOption}
+          />
         </div>
       )}
     </div>

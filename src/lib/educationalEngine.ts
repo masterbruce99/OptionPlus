@@ -11,11 +11,15 @@ export type TermKey =
   | 'Delta' 
   | 'Gamma' 
   | 'Theta' 
+  | 'Theta' 
   | 'Vega' 
   | 'Rho' 
   | 'Implied Volatility' 
   | 'Open Interest' 
-  | 'Volume';
+  | 'Volume'
+  | 'Break-Even'
+  | 'Time Decay'
+  | 'Days to Expiration';
 
 export interface Explanation {
   technical: string;
@@ -79,7 +83,7 @@ export const educationalDictionary: Record<TermKey, Explanation> = {
     positionSpecific: (quantity, value) => {
       if (value === undefined) return '';
       const totalImpact = (value * quantity * 100).toFixed(2);
-      return `For every $1 the stock moves up, your total position changes by approximately $${totalImpact}.`;
+      return `For every $1 the stock moves up, your total position changes by approximately $${totalImpact}. Note: this is a sensitivity, not a guarantee.`;
     }
   },
   'Gamma': {
@@ -89,7 +93,7 @@ export const educationalDictionary: Record<TermKey, Explanation> = {
     positionSpecific: (quantity, value) => {
       if (value === undefined) return '';
       const totalGamma = (value * quantity * 100).toFixed(2);
-      return `For every $1 move in the stock, your total position Delta will change by ${totalGamma}.`;
+      return `For every $1 move in the stock, your total position Delta will change by ${totalGamma}. Note: this is a sensitivity, not a guarantee.`;
     }
   },
   'Theta': {
@@ -99,7 +103,7 @@ export const educationalDictionary: Record<TermKey, Explanation> = {
     positionSpecific: (quantity, value) => {
       if (value === undefined) return '';
       const totalDecay = (Math.abs(value) * quantity * 100).toFixed(2);
-      return `Your position loses approximately $${totalDecay} in value every day due to time decay.`;
+      return `Your position loses approximately $${totalDecay} in value every day due to time decay. Note: this is a sensitivity, not a guarantee.`;
     }
   },
   'Vega': {
@@ -109,7 +113,7 @@ export const educationalDictionary: Record<TermKey, Explanation> = {
     positionSpecific: (quantity, value) => {
       if (value === undefined) return '';
       const totalVega = (value * quantity * 100).toFixed(2);
-      return `If implied volatility increases by 1%, your position gains approximately $${totalVega}.`;
+      return `If implied volatility increases by 1%, your position gains approximately $${totalVega}. Note: this is a sensitivity, not a guarantee.`;
     }
   },
   'Rho': {
@@ -131,5 +135,20 @@ export const educationalDictionary: Record<TermKey, Explanation> = {
     technical: 'The number of option contracts traded during a given period (usually a single trading day).',
     simple: 'How many times this exact option changed hands today.',
     whyItMatters: 'High volume indicates high current interest, making it easier to execute trades quickly.'
+  },
+  'Break-Even': {
+    technical: 'The price the underlying asset must reach at expiration for the option buyer to recover their premium paid (Call: Strike + Premium, Put: Strike - Premium).',
+    simple: 'The exact stock price at expiration where you don\'t lose money, but you don\'t make money either.',
+    whyItMatters: 'It helps you understand exactly how far the stock needs to move before your trade is truly profitable at expiration.'
+  },
+  'Time Decay': {
+    technical: 'The reduction in the extrinsic value of an options contract as it gets closer to its expiration date (measured by Theta).',
+    simple: 'The slow bleed of value every day just because time is passing.',
+    whyItMatters: 'If the stock price doesn\'t move fast enough, time decay will eat away your option\'s value.'
+  },
+  'Days to Expiration': {
+    technical: 'The number of calendar days remaining until the options contract expires.',
+    simple: 'How much time you have left for your bet to play out.',
+    whyItMatters: 'The less time you have, the faster the option loses value (time decay), and the less time the stock has to move in your favor.'
   }
 };
