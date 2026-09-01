@@ -50,6 +50,16 @@ export type TermKey =
   | 'Slippage'
   | 'Financing'
   | 'Borrow Cost'
+  | 'Expected Move'
+  | 'Expected Range'
+  | 'Probability ITM'
+  | 'Probability OTM'
+  | 'Probability of Profit'
+  | 'Probability Density'
+  | 'Strategy Screening'
+  | 'Market View'
+  | 'Capital Efficiency'
+  | 'Thesis Consistency'
   | 'Execution Risk';
 
 export interface Explanation {
@@ -236,6 +246,11 @@ export const educationalDictionary: Record<TermKey, Explanation> = {
     technical: 'The theoretical risk-neutral probability that an option will expire In-The-Money, often approximated using N(d2) from the Black-Scholes model.',
     simple: 'The model\'s estimate of the chance the option will have some value at expiration.',
     whyItMatters: 'A 30 delta call has roughly a 30% chance of expiring ITM. Note that expiring ITM does NOT guarantee the trade makes a profit.'
+  },
+  'Probability OTM': {
+    technical: 'The theoretical risk-neutral probability that an option will expire Out-of-The-Money, often calculated as 1 minus the Probability ITM.',
+    simple: 'The mathematical chance that the option expires completely worthless.',
+    whyItMatters: 'For option sellers, this represents the theoretical win rate if they hold the option to expiration. For buyers, it represents the chance of total loss.'
   },
   'Probability of Profit': {
     technical: 'The theoretical risk-neutral probability that the underlying asset price will settle beyond the strategy\'s break-even point at expiration.',

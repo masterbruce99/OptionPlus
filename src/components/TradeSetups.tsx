@@ -1,8 +1,8 @@
 'use client';
 import React, { useState, useMemo } from 'react';
-import { MarketView, ScreeningFilters, StrategyCandidate } from '../lib/screening/types';
+import { MarketView, ScreeningFilters, StrategyCandidate, MarketDirection, TimeHorizon } from '../lib/screening/types';
 import { generateCandidates } from '../lib/screening/engine';
-import { OptionContract, Quote } from '../lib/providers/marketDataProvider';
+import { OptionContract, Quote } from '../lib/providers/MarketDataProvider';
 
 interface Props {
   quote: Quote | null;
@@ -40,7 +40,7 @@ export default function TradeSetups({ quote, chain }: Props) {
           <label>Direction</label>
           <select 
             value={marketView.direction} 
-            onChange={(e) => setMarketView({...marketView, direction: e.target.value as any})}
+            onChange={(e) => setMarketView({...marketView, direction: e.target.value as MarketDirection})}
             style={{ width: '100%', padding: '8px', marginTop: '4px' }}
           >
             <option>STRONGLY BULLISH</option>
@@ -55,7 +55,7 @@ export default function TradeSetups({ quote, chain }: Props) {
           <label>Time Horizon</label>
           <select 
             value={marketView.timeHorizon} 
-            onChange={(e) => setMarketView({...marketView, timeHorizon: e.target.value as any})}
+            onChange={(e) => setMarketView({...marketView, timeHorizon: e.target.value as TimeHorizon})}
             style={{ width: '100%', padding: '8px', marginTop: '4px' }}
           >
             <option>VERY SHORT</option>
