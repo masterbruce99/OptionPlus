@@ -28,8 +28,8 @@ export default function PayoffGraph({ data, currentUnderlying, breakEvens }: Pay
             stroke="var(--text-muted)"
           />
           <Tooltip 
-            formatter={(value: number) => [`$${value.toFixed(2)}`, 'Profit/Loss']}
-            labelFormatter={(label: number) => `Underlying: $${label.toFixed(2)}`}
+            formatter={(value: any) => [`$${Number(value).toFixed(2)}`, 'Profit/Loss']}
+            labelFormatter={(label: any) => `Underlying: $${Number(label).toFixed(2)}`}
             contentStyle={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}
           />
           <ReferenceLine y={0} stroke="var(--text-muted)" strokeWidth={2} />

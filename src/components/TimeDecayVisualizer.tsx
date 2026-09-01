@@ -61,8 +61,8 @@ export default function TimeDecayVisualizer({ contract, daysToExpiration }: Time
               domain={[0, 'auto']}
             />
             <Tooltip 
-              formatter={(value: number) => [`$${value.toFixed(2)}`, 'Est. Value']}
-              labelFormatter={(label: number) => `Days Passed: ${label}`}
+              formatter={(value: any) => [`$${Number(value).toFixed(2)}`, 'Est. Value']}
+              labelFormatter={(label: any) => `Days Passed: ${label}`}
               contentStyle={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}
             />
             <Line 
