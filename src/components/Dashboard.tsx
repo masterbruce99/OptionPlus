@@ -4,7 +4,7 @@ import OptionChainTable from './OptionChainTable';
 import OptionDetailPanel from './OptionDetailPanel';
 import StrategyAnalyzer from './StrategyAnalyzer';
 import OpportunityDashboard from './OpportunityDashboard';
-import TradeJournal from './TradeJournal';
+import { LearningJournal } from './journal/LearningJournal';
 import ArbitrageScanner from './ArbitrageScanner';
 import { BacktestScanner } from './BacktestScanner';
 import { DataCenter } from './DataCenter';
@@ -366,7 +366,7 @@ export default function Dashboard() {
 
       {activeTab === 'journal' && (
         <div className="animate-fade-in">
-          <TradeJournal />
+          <LearningJournal />
         </div>
       )}
 

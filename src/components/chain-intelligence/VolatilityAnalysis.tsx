@@ -128,6 +128,7 @@ export const VolatilityAnalysis: React.FC<Props> = ({ symbol, chain, expirations
               <Tooltip 
                 contentStyle={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}
                 itemStyle={{ color: 'var(--text-primary)' }}
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 formatter={(value: any) => [typeof value === 'number' ? `${value.toFixed(2)}%` : value, undefined]}
               />
               <Legend />
@@ -159,6 +160,7 @@ export const VolatilityAnalysis: React.FC<Props> = ({ symbol, chain, expirations
                 <Tooltip 
                   contentStyle={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}
                   itemStyle={{ color: 'var(--text-primary)' }}
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   formatter={(value: any) => [typeof value === 'number' ? `${value.toFixed(2)}%` : value, undefined]}
                   labelFormatter={(label) => `Expiration: ${label}`}
                 />

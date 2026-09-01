@@ -16,6 +16,7 @@ export interface WatchlistItem {
 const WATCHLIST_KEY = 'optionplus_watchlist';
 
 export function getWatchlist(): WatchlistItem[] {
+  if (typeof window === 'undefined') return [];
   try {
     const data = localStorage.getItem(WATCHLIST_KEY);
     return data ? JSON.parse(data) : [];
@@ -33,13 +34,13 @@ export function addToWatchlist(item: Omit<WatchlistItem, 'id' | 'addedAt'>): Wat
     addedAt: Date.now(),
   };
   watchlist.push(newItem);
-  localStorage.setItem(WATCHLIST_KEY, JSON.stringify(watchlist));
+  if (typeof window !== 'undefined') localStorage.setItem(WATCHLIST_KEY, JSON.stringify(watchlist));
   return newItem;
 }
 
 export function removeFromWatchlist(id: string): void {
   const watchlist = getWatchlist().filter(item => item.id !== id);
-  localStorage.setItem(WATCHLIST_KEY, JSON.stringify(watchlist));
+  if (typeof window !== 'undefined') localStorage.setItem(WATCHLIST_KEY, JSON.stringify(watchlist));
 }
 
 export function isInWatchlist(symbol: string): boolean {
@@ -47,7 +48,7 @@ export function isInWatchlist(symbol: string): boolean {
 }
 
 export function clearWatchlist(): void {
-  localStorage.removeItem(WATCHLIST_KEY);
+  if (typeof window !== 'undefined') localStorage.removeItem(WATCHLIST_KEY);
 }
 
 // --- Module 14: Opportunity Snapshots ---
@@ -71,6 +72,7 @@ export interface OpportunitySnapshot {
 const SNAPSHOTS_KEY = 'optionplus_snapshots';
 
 export function getSnapshots(): OpportunitySnapshot[] {
+  if (typeof window === 'undefined') return [];
   try {
     const data = localStorage.getItem(SNAPSHOTS_KEY);
     return data ? JSON.parse(data) : [];
@@ -88,7 +90,7 @@ export function saveSnapshot(snapshot: Omit<OpportunitySnapshot, 'id' | 'timesta
     timestamp: Date.now(),
   };
   snapshots.push(newSnapshot);
-  localStorage.setItem(SNAPSHOTS_KEY, JSON.stringify(snapshots));
+  if (typeof window !== 'undefined') localStorage.setItem(SNAPSHOTS_KEY, JSON.stringify(snapshots));
   return newSnapshot;
 }
 
@@ -98,43 +100,100 @@ export function getSnapshotById(id: string): OpportunitySnapshot | null {
 
 export function deleteSnapshot(id: string): void {
   const snapshots = getSnapshots().filter(s => s.id !== id);
-  localStorage.setItem(SNAPSHOTS_KEY, JSON.stringify(snapshots));
+  if (typeof window !== 'undefined') localStorage.setItem(SNAPSHOTS_KEY, JSON.stringify(snapshots));
 }
 
 export function clearSnapshots(): void {
-  localStorage.removeItem(SNAPSHOTS_KEY);
+  if (typeof window !== 'undefined') localStorage.removeItem(SNAPSHOTS_KEY);
 }
 
-// --- Module 16-17: Trade Journal ---
+// --- Module 16-17: Advanced Trade Journal (Phase 13) ---
 
-export type MarketView = 'bullish' | 'bearish' | 'neutral';
-export type JournalStatus = 'open' | 'closed';
+export type MarketViewDirection = 'bullish' | 'bearish' | 'neutral';
+export type VolatilityView = 'increasing' | 'decreasing' | 'neutral';
+export type JournalStatus = 'idea' | 'open' | 'closed';
 
-export interface JournalEntry {
+export interface TradeLegSnapshot {
+  type: 'call' | 'put';
+  strike: number;
+  expiration: string;
+  action: 'buy' | 'sell';
+  price: number;
+  iv?: number;
+  delta?: number;
+}
+
+export interface MarketEvidence {
+  underlyingPriceAtEntry: number;
+  impliedVolatilityAtEntry?: number;
+  ivRankAtEntry?: number;
+  notes: string;
+}
+
+export interface PreTradeChecklist {
+  thesisMatchesMarket: boolean;
+  riskDefined: boolean;
+  capitalEfficient: boolean;
+  liquidityChecked: boolean;
+  earningsChecked: boolean;
+}
+
+export interface TradePostMortem {
+  exitDate: string;
+  exitPrice: number;
+  underlyingPriceAtExit: number;
+  realizedPL: number;
+  daysHeld: number;
+  expectedVsActualMove: {
+    expected: number;
+    actual: number;
+  };
+  thesisAccuracy: 'CORRECT' | 'PARTIALLY_CORRECT' | 'WRONG';
+  primaryPLDriver: 'DELTA' | 'VEGA' | 'THETA' | 'MULTI' | 'UNKNOWN';
+  mistakeClassification?: 'FOMO' | 'SIZING' | 'FORCED_TRADE' | 'IGNORED_RULE' | 'NONE';
+  tradeReview: string;
+}
+
+export interface AdvancedJournalEntry {
   id: string;
-  date: string;
+  date: string; // Entry Date
   underlying: string;
   strategy: string;
-  direction: MarketView;
-  contracts: number;
-  entryPrice: number;
+
+  // Thesis (Module 2)
+  direction: MarketViewDirection;
+  volatilityView: VolatilityView;
   thesis: string;
   expectedOutcome: string;
-  expectedMove?: number;
-  timeHorizon?: string;
+
+  // Market Evidence (Module 3)
+  marketEvidence: MarketEvidence;
+
+  // Pre-Trade (Modules 6-9)
+  checklist: PreTradeChecklist;
+  whatMustHappen: string;
+  whatCanGoWrong: string;
+  invalidationRule: string;
+
+  // Entry Record (Module 10)
+  contracts: number;
+  entryPrice: number;
+  legs: TradeLegSnapshot[];
   risk: string;
-  exitDate?: string;
-  exitPrice?: number;
-  realizedPL?: number;
-  notes: string;
+
+  // Post-Mortem (Modules 11-18)
+  postMortem?: TradePostMortem;
+
   status: JournalStatus;
   createdAt: number;
   updatedAt: number;
 }
 
-const JOURNAL_KEY = 'optionplus_journal';
+// Use a new key to avoid conflicts with Phase 5 mock data
+const JOURNAL_KEY = 'optionplus_learning_journal';
 
-export function getJournal(): JournalEntry[] {
+export function getJournal(): AdvancedJournalEntry[] {
+  if (typeof window === 'undefined') return [];
   try {
     const data = localStorage.getItem(JOURNAL_KEY);
     return data ? JSON.parse(data) : [];
@@ -144,21 +203,21 @@ export function getJournal(): JournalEntry[] {
   }
 }
 
-export function addJournalEntry(entry: Omit<JournalEntry, 'id' | 'createdAt' | 'updatedAt'>): JournalEntry {
+export function addJournalEntry(entry: Omit<AdvancedJournalEntry, 'id' | 'createdAt' | 'updatedAt'>): AdvancedJournalEntry {
   const journal = getJournal();
   const now = Date.now();
-  const newEntry: JournalEntry = {
+  const newEntry: AdvancedJournalEntry = {
     ...entry,
     id: generateId(),
     createdAt: now,
     updatedAt: now,
   };
   journal.push(newEntry);
-  localStorage.setItem(JOURNAL_KEY, JSON.stringify(journal));
+  if (typeof window !== 'undefined') localStorage.setItem(JOURNAL_KEY, JSON.stringify(journal));
   return newEntry;
 }
 
-export function updateJournalEntry(id: string, updates: Partial<JournalEntry>): JournalEntry | null {
+export function updateJournalEntry(id: string, updates: Partial<AdvancedJournalEntry>): AdvancedJournalEntry | null {
   const journal = getJournal();
   const index = journal.findIndex(e => e.id === id);
   if (index === -1) return null;
@@ -169,82 +228,15 @@ export function updateJournalEntry(id: string, updates: Partial<JournalEntry>): 
     updatedAt: Date.now(),
   };
   
-  localStorage.setItem(JOURNAL_KEY, JSON.stringify(journal));
+  if (typeof window !== 'undefined') localStorage.setItem(JOURNAL_KEY, JSON.stringify(journal));
   return journal[index];
-}
-
-export function closeJournalEntry(id: string, exitDate: string, exitPrice: number, realizedPL: number, notes?: string): JournalEntry | null {
-  const updates: Partial<JournalEntry> = {
-    status: 'closed',
-    exitDate,
-    exitPrice,
-    realizedPL,
-  };
-  if (notes !== undefined) {
-    updates.notes = notes;
-  }
-  return updateJournalEntry(id, updates);
 }
 
 export function deleteJournalEntry(id: string): void {
   const journal = getJournal().filter(e => e.id !== id);
-  localStorage.setItem(JOURNAL_KEY, JSON.stringify(journal));
+  if (typeof window !== 'undefined') localStorage.setItem(JOURNAL_KEY, JSON.stringify(journal));
 }
 
-export function getOpenTrades(): JournalEntry[] {
-  return getJournal().filter(e => e.status === 'open');
-}
-
-export function getClosedTrades(): JournalEntry[] {
-  return getJournal().filter(e => e.status === 'closed');
-}
-
-// --- Module 18: Post-Trade Education ---
-
-export interface PostTradeAnalysis {
-  expectedMaxLoss: number;
-  actualRealizedPL: number;
-  returnOnCapital: number;
-  daysHeld: number;
-  thesisAccuracy: 'CORRECT_DIRECTION' | 'WRONG_DIRECTION' | 'NEUTRAL_OUTCOME';
-  timeDecayRelevant: boolean;
-  dataSource: 'USER ENTERED';
-}
-
-export function calculatePostTradeAnalysis(entry: JournalEntry): PostTradeAnalysis | null {
-  if (entry.status !== 'closed' || entry.realizedPL === undefined || entry.exitDate === undefined) {
-    return null;
-  }
-
-  const entryDate = new Date(entry.date);
-  const exitDate = new Date(entry.exitDate);
-  const diffTime = Math.abs(exitDate.getTime() - entryDate.getTime());
-  const daysHeld = Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
-
-  let thesisAccuracy: 'CORRECT_DIRECTION' | 'WRONG_DIRECTION' | 'NEUTRAL_OUTCOME' = 'NEUTRAL_OUTCOME';
-  if (entry.realizedPL > 0) {
-    thesisAccuracy = 'CORRECT_DIRECTION';
-  } else if (entry.realizedPL < 0) {
-    thesisAccuracy = 'WRONG_DIRECTION';
-  }
-
-  let expectedMaxLoss = 0;
-  const riskNum = parseFloat(entry.risk.replace(/[^0-9.-]+/g,""));
-  if (!isNaN(riskNum)) {
-    expectedMaxLoss = riskNum;
-  } else {
-    expectedMaxLoss = entry.entryPrice * entry.contracts * 100;
-  }
-
-  const returnOnCapital = expectedMaxLoss > 0 ? (entry.realizedPL / expectedMaxLoss) * 100 : 0;
-
-  return {
-    expectedMaxLoss,
-    actualRealizedPL: entry.realizedPL,
-    returnOnCapital,
-    daysHeld,
-    thesisAccuracy,
-    timeDecayRelevant: daysHeld > 7,
-    dataSource: 'USER ENTERED'
-  };
+export function getTradesByStatus(status: JournalStatus): AdvancedJournalEntry[] {
+  return getJournal().filter(e => e.status === status);
 }
