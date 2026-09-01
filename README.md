@@ -218,3 +218,20 @@ When historical data is successfully sourced, the engine computes:
 - Average Win/Loss, Largest Win/Loss, Profit Factor
 - Maximum Drawdown (Peak-to-Trough)
 - Equity Curve and Average Holding Period
+
+## Phase 11 — Options Market Scanner & Unusual Activity Intelligence
+
+### Overview
+Phase 11 implements an **Options Market Scanner & Unusual Activity Intelligence Engine**. It strictly adheres to the rule that **unusual activity is a signal for investigation, not proof of directional intent**.
+
+### Implemented Modules & Methodology
+- **Normalized Activity Engine:** Computes Volume / Open Interest ratios, total volume, aggregate notional premium, and chain-level Put/Call ratios.
+- **Aggregate Notional Premium:** Since individual time-and-sales trade sizes are unavailable, premium is estimated using `Total Volume × Midpoint Price × 100`.
+- **False Positive & Fabrication Protection:** Because the data provider (`MarketDataProvider`) relies on end-of-day or delayed snapshot chains, it does not provide historical baseline volume or tick-level execution data. Therefore:
+  - **Volume Anomaly:** Returns `UNAVAILABLE` for historical baseline comparisons.
+  - **Sweep / Block Detection:** Returns `UNAVAILABLE` because aggregate volume cannot distinguish one 1,000-lot block from one thousand 1-lot retail trades.
+  - **Bid/Ask Cross:** Returns `UNAVAILABLE` for single trades.
+  - **IV / OI Change:** Returns `UNAVAILABLE` for historical baseline comparisons.
+- **Activity Classification:** Contracts are scored objectively (0-100) based on Volume/OI ratio, total volume, and aggregate premium. They are classified as `NORMAL ACTIVITY`, `ELEVATED ACTIVITY`, `UNUSUAL ACTIVITY`, or `HIGHLY UNUSUAL ACTIVITY`. No directional assumptions (`BULLISH/BEARISH`) are applied.
+- **Data Quality Score:** The engine transparently penalizes its own activity score when required baseline data is missing, ensuring users understand the confidence level of the signal.
+- **Educational Explanations:** The UI includes prominent sections for "What This Means" and "What This Does NOT Prove" to prevent beginners from blindly mirroring options volume.
