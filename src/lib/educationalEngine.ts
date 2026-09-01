@@ -19,7 +19,15 @@ export type TermKey =
   | 'Volume'
   | 'Break-Even'
   | 'Time Decay'
-  | 'Days to Expiration';
+  | 'Days to Expiration'
+  | 'Long Call'
+  | 'Long Put'
+  | 'Covered Call'
+  | 'Cash-Secured Put'
+  | 'Bull Call Spread'
+  | 'Bear Put Spread'
+  | 'Bull Put Spread'
+  | 'Bear Call Spread';
 
 export interface Explanation {
   technical: string;
@@ -150,5 +158,45 @@ export const educationalDictionary: Record<TermKey, Explanation> = {
     technical: 'The number of calendar days remaining until the options contract expires.',
     simple: 'How much time you have left for your bet to play out.',
     whyItMatters: 'The less time you have, the faster the option loses value (time decay), and the less time the stock has to move in your favor.'
+  },
+  'Long Call': {
+    technical: 'Buying a call option gives you the right to purchase the underlying asset at the strike price before expiration.',
+    simple: 'You pay a premium to lock in a buy price for the stock. If the stock goes up past your strike + premium, you profit.',
+    whyItMatters: 'It offers theoretically unlimited upside with defined risk (you can only lose what you paid for the option).'
+  },
+  'Long Put': {
+    technical: 'Buying a put option gives you the right to sell the underlying asset at the strike price before expiration.',
+    simple: 'You pay a premium to lock in a sell price for the stock. If the stock drops below your strike minus premium, you profit.',
+    whyItMatters: 'It is a defined-risk way to profit from a stock falling, or to protect stock you already own from a crash.'
+  },
+  'Covered Call': {
+    technical: 'Holding a long position in an asset and selling (writing) a call option on that same asset to generate income.',
+    simple: 'You own 100 shares of a stock and sell someone else the right to buy them from you at a higher price, keeping the premium they pay you.',
+    whyItMatters: 'It generates income in a flat or slightly bullish market, but caps your maximum upside if the stock skyrockets.'
+  },
+  'Cash-Secured Put': {
+    technical: 'Writing a put option and simultaneously setting aside the cash required to buy the stock if assigned.',
+    simple: 'You agree to buy a stock at a discount if it falls, and you get paid a premium right now for making that promise.',
+    whyItMatters: 'A popular strategy to get paid while waiting to buy a stock you want anyway, but you risk catching a falling knife if the stock crashes.'
+  },
+  'Bull Call Spread': {
+    technical: 'A debit spread involving the purchase of a call option and the sale of a call option at a higher strike price with the same expiration.',
+    simple: 'You buy a call to bet the stock goes up, and sell a higher call to make the trade cheaper. Your profit is capped at the higher strike.',
+    whyItMatters: 'Reduces the cost and time decay of buying a straight call, but limits your maximum potential profit.'
+  },
+  'Bear Put Spread': {
+    technical: 'A debit spread involving the purchase of a put option and the sale of a put option at a lower strike price with the same expiration.',
+    simple: 'You buy a put to bet the stock goes down, and sell a lower put to make the trade cheaper. Your profit is capped at the lower strike.',
+    whyItMatters: 'Reduces the cost of shorting a stock or buying a naked put, while strictly defining your risk and reward.'
+  },
+  'Bull Put Spread': {
+    technical: 'A credit spread involving the sale of a put option and the purchase of a put option at a lower strike price to cap risk.',
+    simple: 'You get paid to bet a stock will stay above a certain price. You buy a cheaper, lower put just in case the stock crashes.',
+    whyItMatters: 'Generates income with defined risk. You want the stock to stay flat or go up so both options expire worthless and you keep the credit.'
+  },
+  'Bear Call Spread': {
+    technical: 'A credit spread involving the sale of a call option and the purchase of a call option at a higher strike price to cap risk.',
+    simple: 'You get paid to bet a stock will stay below a certain price. You buy a cheaper, higher call just in case the stock spikes.',
+    whyItMatters: 'Generates income with defined risk. You want the stock to stay flat or go down so both options expire worthless and you keep the credit.'
   }
 };
