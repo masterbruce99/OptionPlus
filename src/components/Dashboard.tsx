@@ -10,6 +10,9 @@ import { BacktestScanner } from './BacktestScanner';
 import { DataCenter } from './DataCenter';
 import { PortfolioScanner } from './PortfolioScanner';
 import { OptionContract } from '@/lib/providers/MarketDataProvider';
+import { MarketDataProvider } from '../lib/providers/MarketDataProvider';
+import ProbabilityScanner from './ProbabilityScanner';
+import { OpportunitySnapshot } from '../lib/store';
 
 export default function Dashboard() {
   const [symbol, setSymbol] = useState('');
@@ -25,7 +28,7 @@ export default function Dashboard() {
   const [selectedOption, setSelectedOption] = useState<OptionContract | null>(null);
   
   // Phase 3 & later State
-  const [activeTab, setActiveTab] = useState<'chain' | 'analyzer' | 'arbitrage' | 'opportunities' | 'journal' | 'backtest' | 'datacenter' | 'portfolio'>('chain');
+  const [activeTab, setActiveTab] = useState<'chain' | 'analyzer' | 'arbitrage' | 'opportunities' | 'journal' | 'backtest' | 'datacenter' | 'portfolio' | 'probability'>('chain');
 
   const searchSymbol = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -228,6 +231,12 @@ export default function Dashboard() {
             Backtest
           </button>
           <button 
+            onClick={() => setActiveTab('probability')}
+            style={{ padding: '10px 20px', backgroundColor: activeTab === 'probability' ? 'var(--accent-primary)' : 'var(--bg-tertiary)', color: activeTab === 'probability' ? '#fff' : 'var(--text-primary)', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
+          >
+            Volatility & Probability
+          </button>
+          <button 
             onClick={() => setActiveTab('datacenter')}
             style={{ padding: '10px 20px', backgroundColor: activeTab === 'datacenter' ? 'var(--accent-primary)' : 'var(--bg-tertiary)', color: activeTab === 'datacenter' ? '#fff' : 'var(--text-primary)', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
           >
@@ -336,6 +345,12 @@ export default function Dashboard() {
       {activeTab === 'datacenter' && (
         <div className="animate-fade-in">
           <DataCenter />
+        </div>
+      )}
+
+      {activeTab === 'probability' && (
+        <div className="animate-fade-in">
+          <ProbabilityScanner />
         </div>
       )}
     </div>

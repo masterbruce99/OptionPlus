@@ -222,6 +222,31 @@ export const educationalDictionary: Record<TermKey, Explanation> = {
     simple: 'You get paid to bet a stock will stay below a certain price. You buy a cheaper, higher call just in case the stock spikes.',
     whyItMatters: 'Generates income with defined risk. You want the stock to stay flat or go down so both options expire worthless and you keep the credit.'
   },
+  'Expected Move': {
+    technical: 'The magnitude of price movement implied by the options market, commonly derived from the straddle price or standard deviation formula.',
+    simple: 'How much the options market expects the stock to move (up or down) by a certain date. It is derived from option prices, not from fundamental analysis.',
+    whyItMatters: 'If you think the stock will move more than the Expected Move, buying options might be a good idea. If you think it will move less, selling options might be better. It sets the market baseline.'
+  },
+  'Expected Range': {
+    technical: 'The upper and lower bounds calculated by adding and subtracting the Expected Move from the current underlying price.',
+    simple: 'The price range where the market expects the stock to end up most of the time by expiration.',
+    whyItMatters: 'Options sold outside the expected range are often considered higher probability, though they collect less premium.'
+  },
+  'Probability ITM': {
+    technical: 'The theoretical risk-neutral probability that an option will expire In-The-Money, often approximated using N(d2) from the Black-Scholes model.',
+    simple: 'The model\'s estimate of the chance the option will have some value at expiration.',
+    whyItMatters: 'A 30 delta call has roughly a 30% chance of expiring ITM. Note that expiring ITM does NOT guarantee the trade makes a profit.'
+  },
+  'Probability of Profit': {
+    technical: 'The theoretical risk-neutral probability that the underlying asset price will settle beyond the strategy\'s break-even point at expiration.',
+    simple: 'The model\'s estimate of the chance you will make at least $0.01 on this trade at expiration.',
+    whyItMatters: 'Probability of Profit (POP) is often different from Probability ITM. A long call can expire ITM but still lose money if the stock didn\'t move past the break-even price.'
+  },
+  'Probability Density': {
+    technical: 'A continuous probability distribution representing the likelihood of the underlying asset finishing at specific price points at expiration.',
+    simple: 'A visual curve showing where the stock is most likely to end up. The peak is the current price, and the tails show extreme moves.',
+    whyItMatters: 'Helps visualize market expectations. A wider, flatter curve means the market expects high volatility and large price swings.'
+  },
   'Realized Volatility': {
     technical: 'The actual historical standard deviation of an asset\'s returns over a specific period, annualized.',
     simple: 'How much the stock price actually moved in the past. Compare this to implied volatility to see if options are pricing in more or less movement than historically occurred.',
