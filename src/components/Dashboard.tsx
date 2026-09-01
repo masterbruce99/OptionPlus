@@ -8,6 +8,7 @@ import TradeJournal from './TradeJournal';
 import ArbitrageScanner from './ArbitrageScanner';
 import { BacktestScanner } from './BacktestScanner';
 import { DataCenter } from './DataCenter';
+import { PortfolioScanner } from './PortfolioScanner';
 import { OptionContract } from '@/lib/providers/MarketDataProvider';
 
 export default function Dashboard() {
@@ -24,7 +25,7 @@ export default function Dashboard() {
   const [selectedOption, setSelectedOption] = useState<OptionContract | null>(null);
   
   // Phase 3 & later State
-  const [activeTab, setActiveTab] = useState<'chain' | 'analyzer' | 'arbitrage' | 'opportunities' | 'journal' | 'backtest' | 'datacenter'>('chain');
+  const [activeTab, setActiveTab] = useState<'chain' | 'analyzer' | 'arbitrage' | 'opportunities' | 'journal' | 'backtest' | 'datacenter' | 'portfolio'>('chain');
 
   const searchSymbol = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -214,6 +215,12 @@ export default function Dashboard() {
           >
             Trade Journal
           </button>
+          <button
+            onClick={() => setActiveTab('portfolio')}
+            style={{ padding: '10px 20px', backgroundColor: activeTab === 'portfolio' ? 'var(--accent-primary)' : 'var(--bg-tertiary)', color: activeTab === 'portfolio' ? '#fff' : 'var(--text-primary)', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
+          >
+            Portfolio
+          </button>
           <button 
             onClick={() => setActiveTab('backtest')}
             style={{ padding: '10px 20px', backgroundColor: activeTab === 'backtest' ? 'var(--accent-primary)' : 'var(--bg-tertiary)', color: activeTab === 'backtest' ? '#fff' : 'var(--text-primary)', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
@@ -309,6 +316,14 @@ export default function Dashboard() {
       {activeTab === 'journal' && (
         <div className="animate-fade-in">
           <TradeJournal />
+        </div>
+      )}
+
+      {activeTab === 'portfolio' && (
+        <div className="animate-fade-in">
+          <PortfolioScanner 
+            currentUnderlyingPrice={quote ? quote.price : 0} 
+          />
         </div>
       )}
 
