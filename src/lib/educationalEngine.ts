@@ -27,7 +27,18 @@ export type TermKey =
   | 'Bull Call Spread'
   | 'Bear Put Spread'
   | 'Bull Put Spread'
-  | 'Bear Call Spread';
+  | 'Bear Call Spread'
+  | 'Realized Volatility'
+  | 'IV Rank'
+  | 'IV Percentile'
+  | 'Volatility Skew'
+  | 'Term Structure'
+  | 'Net Edge'
+  | 'Liquidity Score'
+  | 'Data Quality'
+  | 'Execution Score'
+  | 'Quality Score'
+  | 'Market Regime';
 
 export interface Explanation {
   technical: string;
@@ -198,5 +209,60 @@ export const educationalDictionary: Record<TermKey, Explanation> = {
     technical: 'A credit spread involving the sale of a call option and the purchase of a call option at a higher strike price to cap risk.',
     simple: 'You get paid to bet a stock will stay below a certain price. You buy a cheaper, higher call just in case the stock spikes.',
     whyItMatters: 'Generates income with defined risk. You want the stock to stay flat or go down so both options expire worthless and you keep the credit.'
+  },
+  'Realized Volatility': {
+    technical: 'The actual historical standard deviation of an asset\'s returns over a specific period, annualized.',
+    simple: 'How much the stock price actually moved in the past. Compare this to implied volatility to see if options are pricing in more or less movement than historically occurred.',
+    whyItMatters: 'If implied volatility is much higher than realized volatility, options may be overpriced. If lower, they may be cheap. This comparison is one input into volatility trading strategies.'
+  },
+  'IV Rank': {
+    technical: 'Current IV relative to its historical range: (Current IV - 52-week Low IV) / (52-week High IV - 52-week Low IV) × 100.',
+    simple: 'Where is today\'s implied volatility compared to its highest and lowest points? An IV Rank of 80 means current IV is near its historical high.',
+    whyItMatters: 'High IV Rank may suggest options are relatively expensive compared to recent history. Low IV Rank may suggest they are cheap. This is context, not a trading signal.'
+  },
+  'IV Percentile': {
+    technical: 'The percentage of trading days in the lookback period where IV was at or below the current level.',
+    simple: 'What percentage of days had lower volatility than today? An IV Percentile of 90 means today\'s IV is higher than 90% of recent days.',
+    whyItMatters: 'Unlike IV Rank which only uses the min and max, IV Percentile uses all data points. It shows how unusual today\'s IV level is relative to the full distribution.'
+  },
+  'Volatility Skew': {
+    technical: 'The difference in implied volatility across strike prices for the same expiration date.',
+    simple: 'Options at different prices don\'t all have the same implied volatility. Usually out-of-the-money puts have higher IV than calls, reflecting greater demand for downside protection.',
+    whyItMatters: 'The shape of the volatility skew reveals market sentiment about tail risks. A steep put skew indicates the market is pricing in more crash risk.'
+  },
+  'Term Structure': {
+    technical: 'The pattern of at-the-money implied volatility across different expiration dates.',
+    simple: 'Comparing IV across near-term and far-term options. Usually longer-dated options have higher IV (contango). When near-term IV is higher (backwardation), it often signals a near-term event like earnings.',
+    whyItMatters: 'Term structure tells you whether the market expects more volatility in the near future or the distant future. Shifts can signal event-driven uncertainty.'
+  },
+  'Net Edge': {
+    technical: 'The modeled gross profit minus estimated transaction costs (commissions, exchange fees, regulatory fees, slippage).',
+    simple: 'How much theoretical profit remains after accounting for the cost of executing the trade. If this number is zero or negative, the opportunity may not be worth pursuing.',
+    whyItMatters: 'Gross edge can look attractive, but transaction costs can consume a large fraction of small opportunities. Net edge shows the realistic potential.'
+  },
+  'Liquidity Score': {
+    technical: 'A weighted composite of bid/ask spread percentage (40%), average volume (30%), and open interest (30%), normalized to 0–100.',
+    simple: 'A score measuring how easily you can enter and exit a position at a fair price. Higher scores mean tighter markets and more trading activity.',
+    whyItMatters: 'Low liquidity means wider spreads, more slippage, and difficulty exiting. An opportunity with a great theoretical edge but low liquidity may be impractical to execute.'
+  },
+  'Data Quality': {
+    technical: 'A score measuring the completeness and consistency of the market data powering the analysis: field presence (50%), pricing consistency (25%), data availability (25%).',
+    simple: 'How complete and reliable is the information being used to analyze this opportunity? Missing Greeks, zero volume, or inconsistent bid/ask prices lower this score.',
+    whyItMatters: 'Analysis is only as good as its inputs. A low data quality score means the analysis may be unreliable. Always check what data is missing before acting.'
+  },
+  'Execution Score': {
+    technical: 'A deductive score starting at 100, with deductions for missing quotes (-30), wide spreads (-20), low volume (-20), low open interest (-15), and missing cost info (-15).',
+    simple: 'Can this trade actually be executed at or near the displayed prices? The score drops for each practical barrier to execution.',
+    whyItMatters: 'A theoretically perfect trade is useless if you cannot execute it. This score flags the most common reasons a trade might not fill as expected.'
+  },
+  'Quality Score': {
+    technical: 'A configurable weighted composite: Edge (30%) + Execution (25%) + Liquidity (20%) + Data Quality (15%) + Cost Certainty (10%). All components are normalized to 0–100.',
+    simple: 'A single number that combines everything: Is there an edge? Can you execute it? Is there enough liquidity? Is the data reliable? Are costs predictable?',
+    whyItMatters: 'This score ranks opportunities for investigation, not for trading. A high score means the opportunity is worth analyzing further, not that it should be executed.'
+  },
+  'Market Regime': {
+    technical: 'A classification of the current market environment based on trend direction (price change) and volatility level (ATM implied volatility).',
+    simple: 'Is the market going up, going down, or staying flat? Is volatility high, low, or moderate? This gives you a quick read of current conditions.',
+    whyItMatters: 'Different strategies work better in different regimes. Understanding the current environment helps you evaluate whether a strategy is appropriate.'
   }
 };

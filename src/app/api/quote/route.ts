@@ -13,12 +13,13 @@ export async function GET(request: NextRequest) {
     const provider = getProvider();
     const quote = await provider.getQuote(symbol);
     return NextResponse.json(quote);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Quote API Error:', error);
+    const err = error as Error;
     // Determine if it's a configuration error
-    if (error.message && error.message.includes('Provider Not Configured')) {
-      return NextResponse.json({ error: error.message }, { status: 503 });
+    if (err.message && err.message.includes('Provider Not Configured')) {
+      return NextResponse.json({ error: err.message }, { status: 503 });
     }
-    return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json({ error: err.message || 'Internal Server Error' }, { status: 500 });
   }
 }

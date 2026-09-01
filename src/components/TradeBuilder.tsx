@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react';
 import { OptionContract } from '@/lib/providers/MarketDataProvider';
 import { TradeLeg } from '@/lib/payoffEngine';
-import EducationalTooltip from './EducationalTooltip';
 
 interface TradeBuilderProps {
   currentUnderlying: number;
@@ -22,19 +21,24 @@ export default function TradeBuilder({ currentUnderlying, chain, onLegsChange }:
   const [leg2Strike, setLeg2Strike] = useState<number>(0);
   const [stockEntry, setStockEntry] = useState<number>(currentUnderlying);
 
+  const [prevChain, setPrevChain] = useState<OptionContract[]>([]);
+
   // Get available strikes from chain
   const strikes = Array.from(new Set(chain.map(c => c.strike))).sort((a, b) => a - b);
   
-  useEffect(() => {
-    // Auto-select ATM-ish strikes on initial load or chain change
-    if (strikes.length > 0 && leg1Strike === 0) {
+  if (chain !== prevChain) {
+    setPrevChain(chain);
+    if (strikes.length > 0) {
       const atm = strikes.reduce((prev, curr) => Math.abs(curr - currentUnderlying) < Math.abs(prev - currentUnderlying) ? curr : prev);
       setLeg1Strike(atm);
       
       const nextStrike = strikes.find(s => s > atm) || atm;
       setLeg2Strike(nextStrike);
+    } else {
+      setLeg1Strike(0);
+      setLeg2Strike(0);
     }
-  }, [strikes, currentUnderlying]);
+  }
 
   useEffect(() => {
     if (leg1Strike === 0) return; // Wait for initial auto-select
@@ -94,7 +98,7 @@ export default function TradeBuilder({ currentUnderlying, chain, onLegsChange }:
     }
 
     onLegsChange(newLegs, contractMap);
-  }, [strategy, leg1Strike, leg2Strike, stockEntry, quantity, customQuantity, chain]);
+  }, [strategy, leg1Strike, leg2Strike, stockEntry, quantity, customQuantity, chain, onLegsChange]);
 
   const isSpread = strategy.includes('Spread');
   const needsStock = strategy === 'Covered Call';

@@ -1,5 +1,5 @@
 'use client';
-import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine } from 'recharts';
+import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 import { OptionContract } from '@/lib/providers/MarketDataProvider';
 
 interface TimeDecayVisualizerProps {
@@ -39,7 +39,7 @@ export default function TimeDecayVisualizer({ contract, daysToExpiration }: Time
     <div className="card">
       <h3 style={{ marginBottom: '0.5rem' }}>Time Decay (Theta) Visualizer</h3>
       <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
-        If the stock price and volatility do not move, here is how the option's value is estimated to bleed out over time due to Theta.
+        If the stock price and volatility do not move, here is how the option&apos;s value is estimated to bleed out over time due to Theta.
         <br />
         <span style={{ color: 'var(--warning)' }}>DATA SOURCE: MODEL ESTIMATE based on current Theta.</span>
       </p>
@@ -61,7 +61,9 @@ export default function TimeDecayVisualizer({ contract, daysToExpiration }: Time
               domain={[0, 'auto']}
             />
             <Tooltip 
-              formatter={(value: any) => [`$${Number(value).toFixed(2)}`, 'Est. Value']}
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              formatter={(value: any) => [typeof value === 'number' ? `$${value.toFixed(2)}` : `$${Number(value).toFixed(2)}`, 'Est. Value']}
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               labelFormatter={(label: any) => `Days Passed: ${label}`}
               contentStyle={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}
             />

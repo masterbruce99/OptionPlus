@@ -58,7 +58,7 @@ export default function ScenarioAnalysis({ legs, currentUnderlying, contracts, d
 
   return (
     <div className="card">
-      <h3 style={{ marginBottom: '0.5rem' }}>"What If?" Scenario Analysis</h3>
+      <h3 style={{ marginBottom: '0.5rem' }}>&quot;What If?&quot; Scenario Analysis</h3>
       <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
         Estimated P/L if the stock immediately moves by the given percentage (assuming no change in time or implied volatility).
         <br/>

@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { OptionContract } from '@/lib/providers/MarketDataProvider';
 import { TradeLeg, StrategyAnalysis, analyzeStrategy } from '@/lib/payoffEngine';
 import { evaluateRisk } from '@/lib/riskEngine';
@@ -9,7 +9,7 @@ import ScenarioAnalysis from './ScenarioAnalysis';
 import GreekExposure from './GreekExposure';
 import TimeDecayVisualizer from './TimeDecayVisualizer';
 import StrategyComparison from './StrategyComparison';
-import EducationalTooltip from './EducationalTooltip';
+
 
 interface StrategyAnalyzerProps {
   currentUnderlying: number;
@@ -21,6 +21,11 @@ export default function StrategyAnalyzer({ currentUnderlying, chain, daysToExpir
   const [legs, setLegs] = useState<TradeLeg[]>([]);
   const [contracts, setContracts] = useState<Map<string, OptionContract>>(new Map());
   const [savedStrategies, setSavedStrategies] = useState<StrategyAnalysis[]>([]);
+
+  const handleLegsChange = useCallback((newLegs: TradeLeg[], newContracts: Map<string, OptionContract>) => {
+    setLegs(newLegs);
+    setContracts(newContracts);
+  }, []);
 
   // 1. Analyze Current Strategy
   const currentAnalysis = analyzeStrategy(legs, currentUnderlying);
@@ -45,10 +50,7 @@ export default function StrategyAnalyzer({ currentUnderlying, chain, daysToExpir
       <TradeBuilder 
         currentUnderlying={currentUnderlying} 
         chain={chain} 
-        onLegsChange={(newLegs, newContracts) => {
-          setLegs(newLegs);
-          setContracts(newContracts);
-        }} 
+        onLegsChange={handleLegsChange} 
       />
 
       {/* Warnings */}

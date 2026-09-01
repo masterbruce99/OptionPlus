@@ -3,12 +3,14 @@ import { useState } from 'react';
 import OptionChainTable from './OptionChainTable';
 import OptionDetailPanel from './OptionDetailPanel';
 import StrategyAnalyzer from './StrategyAnalyzer';
+import OpportunityDashboard from './OpportunityDashboard';
+import TradeJournal from './TradeJournal';
 import { OptionContract } from '@/lib/providers/MarketDataProvider';
 
 export default function Dashboard() {
   const [symbol, setSymbol] = useState('');
   const [loading, setLoading] = useState(false);
-  const [quote, setQuote] = useState<any>(null);
+  const [quote, setQuote] = useState<{ price: number; change: number; changePercentage: number; volume: number; symbol: string } | null>(null);
   const [expirations, setExpirations] = useState<string[]>([]);
   const [selectedExp, setSelectedExp] = useState<string>('');
   const [chain, setChain] = useState<OptionContract[]>([]);
@@ -19,7 +21,7 @@ export default function Dashboard() {
   const [selectedOption, setSelectedOption] = useState<OptionContract | null>(null);
   
   // Phase 3 State
-  const [activeTab, setActiveTab] = useState<'chain' | 'analyzer'>('chain');
+  const [activeTab, setActiveTab] = useState<'chain' | 'analyzer' | 'opportunities' | 'journal'>('chain');
 
   const searchSymbol = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,8 +54,8 @@ export default function Dashboard() {
           await fetchChain(symbol.toUpperCase(), expData[0]);
         }
       }
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError((err as Error).message);
     } finally {
       setLoading(false);
     }
@@ -68,7 +70,7 @@ export default function Dashboard() {
         setChain(chainData);
         setSelectedOption(null); // Reset selection on new chain
       }
-    } catch (err: any) {
+    } catch {
       setError('Failed to fetch option chain.');
     } finally {
       setLoading(false);
@@ -191,6 +193,18 @@ export default function Dashboard() {
           >
             Strategy Analyzer
           </button>
+          <button 
+            onClick={() => setActiveTab('opportunities')}
+            style={{ padding: '10px 20px', backgroundColor: activeTab === 'opportunities' ? 'var(--accent-primary)' : 'var(--bg-tertiary)', color: activeTab === 'opportunities' ? '#fff' : 'var(--text-primary)', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
+          >
+            Opportunities
+          </button>
+          <button 
+            onClick={() => setActiveTab('journal')}
+            style={{ padding: '10px 20px', backgroundColor: activeTab === 'journal' ? 'var(--accent-primary)' : 'var(--bg-tertiary)', color: activeTab === 'journal' ? '#fff' : 'var(--text-primary)', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
+          >
+            Trade Journal
+          </button>
         </div>
       )}
 
@@ -249,6 +263,22 @@ export default function Dashboard() {
               selectedExp ? Math.max(1, Math.ceil((new Date(selectedExp).getTime() - new Date().getTime()) / (1000 * 3600 * 24))) : 30
             }
           />
+        </div>
+      )}
+
+      {expirations.length > 0 && activeTab === 'opportunities' && (
+        <div className="animate-fade-in">
+          <OpportunityDashboard
+            quote={quote}
+            chain={chain}
+            expiration={selectedExp}
+          />
+        </div>
+      )}
+
+      {activeTab === 'journal' && (
+        <div className="animate-fade-in">
+          <TradeJournal />
         </div>
       )}
     </div>

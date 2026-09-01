@@ -29,7 +29,7 @@ export default function OptionChainTable({ chain, underlyingPrice, isBeginnerMod
     if (opt.type === 'put') putMap.set(opt.strike, opt);
   });
 
-  const TableHeader = () => (
+  const tableHeader = (
     <thead>
       <tr style={{ borderBottom: '2px solid var(--border-color)', backgroundColor: 'var(--bg-tertiary)' }}>
         {/* CALLS */}
@@ -67,7 +67,7 @@ export default function OptionChainTable({ chain, underlyingPrice, isBeginnerMod
   return (
     <div style={{ overflowX: 'auto', fontSize: '0.9rem' }}>
       <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'right', whiteSpace: 'nowrap' }}>
-        <TableHeader />
+        {tableHeader}
         <tbody>
           {strikes.map(strike => {
             const call = callMap.get(strike);

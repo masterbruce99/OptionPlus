@@ -12,7 +12,6 @@ import {
   assessLiquidity,
   getTradeDirection
 } from '@/lib/calculations';
-import { educationalDictionary } from '@/lib/educationalEngine';
 
 interface OptionDetailPanelProps {
   option: OptionContract;

@@ -14,11 +14,12 @@ export async function GET(request: NextRequest) {
     const provider = getProvider();
     const chain = await provider.getOptionChain(symbol, expiration);
     return NextResponse.json(chain);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Chain API Error:', error);
-    if (error.message && error.message.includes('Provider Not Configured')) {
-      return NextResponse.json({ error: error.message }, { status: 503 });
+    const err = error as Error;
+    if (err.message && err.message.includes('Provider Not Configured')) {
+      return NextResponse.json({ error: err.message }, { status: 503 });
     }
-    return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json({ error: err.message || 'Internal Server Error' }, { status: 500 });
   }
 }

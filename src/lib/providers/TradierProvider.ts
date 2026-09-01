@@ -75,7 +75,15 @@ export class TradierProvider implements MarketDataProvider {
 
     const chain = Array.isArray(options) ? options : [options];
 
-    return chain.map((opt: any) => ({
+    interface TradierOptionResponse {
+      symbol: string; underlying: string; expiration_date: string;
+      strike: number; option_type: string;
+      bid: number; ask: number; last: number;
+      volume: number; open_interest: number;
+      greeks?: { mid_iv?: number; smv_vol?: number; delta?: number; gamma?: number; theta?: number; vega?: number; rho?: number };
+    }
+
+    return chain.map((opt: TradierOptionResponse) => ({
       symbol: opt.symbol,
       underlying: opt.underlying,
       expiration: opt.expiration_date,

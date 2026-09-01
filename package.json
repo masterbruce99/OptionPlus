@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "tsx src/lib/calculations.test.ts && tsx src/lib/educationalEngine.test.ts && tsx src/lib/payoffEngine.test.ts"
+    "test": "tsx src/lib/calculations.test.ts && tsx src/lib/educationalEngine.test.ts && tsx src/lib/payoffEngine.test.ts && tsx src/lib/opportunityScoring.test.ts && tsx src/lib/opportunityEngine.test.ts"
   },
   "dependencies": {
     "next": "16.3.4",
