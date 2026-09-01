@@ -9,11 +9,9 @@ import ArbitrageScanner from './ArbitrageScanner';
 import { BacktestScanner } from './BacktestScanner';
 import { DataCenter } from './DataCenter';
 import { PortfolioScanner } from './PortfolioScanner';
-import { OptionContract } from '@/lib/providers/MarketDataProvider';
-import { MarketDataProvider } from '../lib/providers/MarketDataProvider';
 import ProbabilityScanner from './ProbabilityScanner';
 import TradeSetups from './TradeSetups';
-import { OpportunitySnapshot } from '../lib/store';
+import { OptionContract } from '../lib/providers/MarketDataProvider';
 
 export default function Dashboard() {
   const [symbol, setSymbol] = useState('');

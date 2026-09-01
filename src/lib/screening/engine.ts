@@ -1,9 +1,7 @@
-import { OptionContract } from '../providers/marketDataProvider';
+import { OptionContract } from '../providers/MarketDataProvider';
 import { TradeLeg, StrategyAnalysis, analyzeLongCall, analyzeLongPut, analyzeVerticalSpread } from '../payoffEngine';
 import { MarketView, ScreeningFilters, StrategyCandidate, ScoreCard } from './types';
-import { calculateProbabilityOfProfit } from '../probability/probabilityOfProfit';
-import { calculateProbabilities } from '../probability/probabilityEngine';
-import { calculateExpectedMoveStraddle } from '../probability/expectedMove';
+import { calculateProbabilityOfProfit, StrategyType } from '../probability/probabilityOfProfit';
 import { calculateLiquidityScore } from '../opportunityScoring';
 
 const RISK_FREE_RATE = 0.05;
@@ -16,9 +14,7 @@ function getDaysToExpiration(expiration: string): number {
   return Math.max(1, Math.ceil(diff / (1000 * 3600 * 24)));
 }
 
-function getMid(contract: OptionContract): number {
-  return (contract.bid + contract.ask) / 2;
-}
+
 
 export function generateCandidates(
   chain: OptionContract[],
@@ -72,7 +68,7 @@ export function generateCandidates(
     let pop: number | null = null;
     let matchExplanation: string[] = [];
     let conflictExplanation: string[] = [];
-    let warningMessages: string[] = [];
+    const warningMessages: string[] = [];
 
     if (avgIv > 0 && analysis.breakEvens.length > 0) {
       const breakEven = analysis.breakEvens[0]; // simplistic approximation
@@ -82,7 +78,7 @@ export function generateCandidates(
         T: t,
         r: RISK_FREE_RATE,
         v: avgIv,
-        strategy: strategyName as any,
+        strategy: strategyName as StrategyType,
         breakEven
       });
 
@@ -148,7 +144,7 @@ export function generateCandidates(
         try {
           const analysis = analyzeLongCall(leg);
           processCandidate('Long Call', [leg], analysis, exp);
-        } catch (e) { console.error('Error analyzing Long Call:', e); }
+        } catch (e) { void e; /* Error analyzing Long Call */ }
       });
     }
 
@@ -161,7 +157,7 @@ export function generateCandidates(
         try {
           const analysis = analyzeLongPut(leg);
           processCandidate('Long Put', [leg], analysis, exp);
-        } catch (e) {}
+        } catch (e) { void e; }
       });
     }
 
@@ -184,7 +180,7 @@ export function generateCandidates(
             analysis.name = 'Bull Call Spread';
             if (analysis.netDebitCredit >= 0) continue; // must be a debit
             processCandidate('Bull Call Spread', [leg1, leg2], analysis, exp);
-          } catch (e) { console.error('Error analyzing Bull Call Spread:', e); }
+          } catch (e) { void e; /* Error analyzing Bull Call Spread */ }
         }
       }
     }
@@ -207,7 +203,7 @@ export function generateCandidates(
             analysis.name = 'Bear Put Spread';
             if (analysis.netDebitCredit >= 0) continue; 
             processCandidate('Bear Put Spread', [leg1, leg2], analysis, exp);
-          } catch (e) {}
+          } catch (e) { void e; }
         }
       }
     }
@@ -230,7 +226,7 @@ export function generateCandidates(
             analysis.name = 'Bull Put Spread';
             if (analysis.netDebitCredit <= 0) continue; // must be credit
             processCandidate('Bull Put Spread', [leg1, leg2], analysis, exp);
-          } catch (e) {}
+          } catch (e) { void e; }
         }
       }
     }
@@ -253,7 +249,7 @@ export function generateCandidates(
             analysis.name = 'Bear Call Spread';
             if (analysis.netDebitCredit <= 0) continue; 
             processCandidate('Bear Call Spread', [leg1, leg2], analysis, exp);
-          } catch (e) {}
+          } catch (e) { void e; }
         }
       }
     }

@@ -12,7 +12,8 @@ export class HistoricalInterestRateProvider {
    * Backtests requiring financing should use rates appropriate to the historical period.
    * Do not use today's rate across historical years.
    */
-  static async getHistoricalRate(_date: string): Promise<{ status: DataAvailabilityStatus, rate: number | null }> {
+  static async getHistoricalRate(date: string): Promise<{ status: DataAvailabilityStatus, rate: number | null }> {
+    void date;
     // Stub implementation to be backed by actual provider or Treasury API
     return {
       status: 'UNAVAILABLE',

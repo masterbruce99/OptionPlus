@@ -1,4 +1,4 @@
-import { OptionContract } from '../providers/marketDataProvider';
+import { OptionContract } from '../providers/MarketDataProvider';
 import { SetupSnapshot } from './types';
 
 const SETUPS_KEY = 'OptionPlus_Setups';
@@ -10,6 +10,7 @@ export function getSavedSetups(): SetupSnapshot[] {
     if (!data) return [];
     return JSON.parse(data);
   } catch (e) {
+    void e;
     return [];
   }
 }

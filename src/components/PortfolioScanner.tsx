@@ -1,8 +1,8 @@
 'use client';
-import { useState, useEffect } from 'react';
-import { PortfolioPosition, PortfolioGreeks, ConcentrationReport, RiskWarning, ScenarioResult } from '@/lib/portfolio/types';
+import { useState, useMemo } from 'react';
+import { PortfolioPosition, PortfolioGreeks, ConcentrationReport, RiskWarning } from '@/lib/portfolio/types';
 import { calculatePositionPnL, aggregatePortfolioGreeks, analyzeConcentration, calculateNotionalExposure, calculatePremiumExposure } from '@/lib/portfolio/engine';
-import { generateExpirationPayoff, generateScenarioMatrix, generateTimeDecayScenarios } from '@/lib/portfolio/scenarios';
+import { generateScenarioMatrix } from '@/lib/portfolio/scenarios';
 import { analyzeAssignmentRisk, analyzeExpirationRisk, analyzeExerciseRisk, analyzeGreekExposure, analyzeConcentrationRisk, analyzeDataQuality, calculateDeltaHedge } from '@/lib/portfolio/risk';
 
 export function PortfolioScanner({ currentUnderlyingPrice }: { currentUnderlyingPrice: number }) {
@@ -18,8 +18,12 @@ export function PortfolioScanner({ currentUnderlyingPrice }: { currentUnderlying
   const [entryPrice, setEntryPrice] = useState(0);
 
   // Scenarios
-  const [scenarioMatrix, setScenarioMatrix] = useState<ScenarioResult[]>([]);
-  const [decayScenarios, setDecayScenarios] = useState<ScenarioResult[]>([]);
+  const scenarioMatrix = useMemo(() => {
+    if (positions.length > 0 && currentUnderlyingPrice > 0) {
+      return generateScenarioMatrix(positions, currentUnderlyingPrice);
+    }
+    return [];
+  }, [positions, currentUnderlyingPrice]);
 
   // Computed state
   const greeks: PortfolioGreeks = aggregatePortfolioGreeks(positions);
@@ -39,12 +43,6 @@ export function PortfolioScanner({ currentUnderlyingPrice }: { currentUnderlying
   const totalPnL = positions.reduce((sum, pos) => sum + calculatePositionPnL(pos), 0);
   const deltaHedge = calculateDeltaHedge(greeks.dollarDelta);
 
-  useEffect(() => {
-    if (positions.length > 0 && currentUnderlyingPrice > 0) {
-      setScenarioMatrix(generateScenarioMatrix(positions, currentUnderlyingPrice));
-      setDecayScenarios(generateTimeDecayScenarios(positions));
-    }
-  }, [positions, currentUnderlyingPrice]);
 
   const handleAddPosition = () => {
     const newPos: PortfolioPosition = {
@@ -74,14 +72,14 @@ export function PortfolioScanner({ currentUnderlyingPrice }: { currentUnderlying
         <h3>Add Manual Position</h3>
         <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '10px' }}>
           <input placeholder="Underlying" value={symbol} onChange={e => setSymbol(e.target.value)} />
-          <select value={type} onChange={e => setType(e.target.value as any)}>
+          <select value={type} onChange={e => setType(e.target.value as 'call' | 'put' | 'stock')}>
             <option value="call">Call</option>
             <option value="put">Put</option>
             <option value="stock">Stock</option>
           </select>
           {type !== 'stock' && <input type="number" placeholder="Strike" value={strike} onChange={e => setStrike(Number(e.target.value))} />}
           {type !== 'stock' && <input type="date" placeholder="Expiration" value={expiration} onChange={e => setExpiration(e.target.value)} />}
-          <select value={side} onChange={e => setSide(e.target.value as any)}>
+          <select value={side} onChange={e => setSide(e.target.value as 'long' | 'short')}>
             <option value="long">Long</option>
             <option value="short">Short</option>
           </select>
@@ -125,7 +123,7 @@ export function PortfolioScanner({ currentUnderlyingPrice }: { currentUnderlying
         ) : (
           <ul style={{ listStyle: 'none', padding: 0 }}>
             {warnings.map(w => (
-              <li key={w.id} style={{ marginBottom: '10px', padding: '10px', backgroundColor: w.severity === 'CRITICAL' ? 'rgba(255,0,0,0.1)' : w.severity === 'WARNING' ? 'rgba(255,165,0,0.1)' : 'rgba(0,0,255,0.1)', borderLeft: \`4px solid \${w.severity === 'CRITICAL' ? 'red' : w.severity === 'WARNING' ? 'orange' : 'blue'}\` }}>
+              <li key={w.id} style={{ marginBottom: '10px', padding: '10px', backgroundColor: w.severity === 'CRITICAL' ? 'rgba(255,0,0,0.1)' : w.severity === 'WARNING' ? 'rgba(255,165,0,0.1)' : 'rgba(0,0,255,0.1)', borderLeft: `4px solid ${w.severity === 'CRITICAL' ? 'red' : w.severity === 'WARNING' ? 'orange' : 'blue'}` }}>
                 <strong>{w.type}</strong>: {w.message}
               </li>
             ))}

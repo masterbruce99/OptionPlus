@@ -1,23 +1,20 @@
 "use client";
 
-import React, { useState, useMemo } from 'react';
-import { calculateStraddleExpectedMove, calculateVolatilityExpectedMove } from '../lib/probability/expectedMove';
+import React, { useState } from 'react';
+import { calculateVolatilityExpectedMove } from '../lib/probability/expectedMove';
 import { calculateOptionProbabilities } from '../lib/probability/probabilityEngine';
 import { calculateProbabilityOfProfit } from '../lib/probability/probabilityOfProfit';
 import { buildVolatilityContext } from '../lib/probability/volatilityAnalysis';
-import { ProbabilityAnalysis, ExpectedMove, VolatilityContext, HistoricalPrice } from '../lib/probability/types';
+import { HistoricalPrice } from '../lib/probability/types';
 
 export default function ProbabilityScanner() {
   const [underlyingPrice, setUnderlyingPrice] = useState<number>(100);
   const [strike, setStrike] = useState<number>(100);
   const [daysToExpiration, setDaysToExpiration] = useState<number>(30);
   const [iv, setIv] = useState<number>(0.25);
-  const [riskFreeRate, setRiskFreeRate] = useState<number>(0.04);
-  const [atmCallAsk, setAtmCallAsk] = useState<number>(3.50);
-  const [atmPutAsk, setAtmPutAsk] = useState<number>(3.50);
+  const riskFreeRate = 0.04;
 
   // Compute values
-  const straddleEM = calculateStraddleExpectedMove(underlyingPrice, atmCallAsk, atmPutAsk);
   const volEM = calculateVolatilityExpectedMove(underlyingPrice, iv, daysToExpiration);
   
   const callProb = calculateOptionProbabilities({
@@ -25,20 +22,16 @@ export default function ProbabilityScanner() {
   }, 'call');
   
   const popExample = calculateProbabilityOfProfit({
-    S: underlyingPrice, breakEven: underlyingPrice + atmCallAsk, T: daysToExpiration / 365, r: riskFreeRate, v: iv, strategy: 'Long Call'
+    S: underlyingPrice, breakEven: underlyingPrice + 3.50, T: daysToExpiration / 365, r: riskFreeRate, v: iv, strategy: 'Long Call'
   });
 
-  // Mock historical data just for the demo/UI (but clearly label if missing)
-  const mockHistoricalPrices = useMemo<HistoricalPrice[]>(() => Array(30).fill(0).map((_, i) => ({
-    date: `Day ${i}`,
-    close: 100 + Math.random() * 5 - 2.5
-  })), []);
-  const mockHistoricalIvs = useMemo(() => Array(30).fill(0).map(() => 0.20 + Math.random() * 0.10), []);
+  const historicalPrices: HistoricalPrice[] = [];
+  const historicalIvs: number[] = [];
 
   const volContext = buildVolatilityContext({
     currentIV: iv,
-    historicalIVs: mockHistoricalIvs,
-    historicalPrices: mockHistoricalPrices,
+    historicalIVs: historicalIvs,
+    historicalPrices: historicalPrices,
     ivHistoryRequired: 20
   });
 
@@ -93,9 +86,12 @@ export default function ProbabilityScanner() {
               </div>
               <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 rounded text-xs">
                 <strong>Methodology:</strong> {volContext.methodology}
-                <ul className="list-disc pl-4 mt-1">
+                <ul className="list-disc pl-4 mt-1 mb-2">
                   {volContext.assumptions.map((a, i) => <li key={i}>{a}</li>)}
                 </ul>
+                <div className="mt-2 text-amber-600 dark:text-amber-400 font-semibold border-t border-blue-200 dark:border-blue-700 pt-2">
+                  Historical observations are unavailable from the configured data source.
+                </div>
               </div>
             </div>
           </div>
@@ -150,7 +146,7 @@ export default function ProbabilityScanner() {
                 </div>
                 <div className="flex justify-between">
                   <span>Break-Even Price:</span>
-                  <span className="font-mono text-gray-900 dark:text-white">${(underlyingPrice + atmCallAsk).toFixed(2)}</span>
+                  <span className="font-mono text-gray-900 dark:text-white">${(underlyingPrice + 3.50).toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Prob of Profit (POP):</span>

@@ -2,7 +2,7 @@ import { describe, it } from 'node:test';
 import * as assert from 'node:assert';
 import { PortfolioPosition } from './types';
 import { aggregatePortfolioGreeks, calculatePositionPnL, analyzeConcentration } from './engine';
-import { analyzeAssignmentRisk, analyzeGreekExposure, calculateDeltaHedge } from './risk';
+import { analyzeAssignmentRisk, calculateDeltaHedge } from './risk';
 
 describe('Phase 8: Portfolio Risk & Position Intelligence', () => {
   const mockPos1: PortfolioPosition = {

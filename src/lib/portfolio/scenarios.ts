@@ -1,5 +1,5 @@
 import { PortfolioPosition, ScenarioResult } from './types';
-import { TradeLeg, calculatePayoff, PayoffPoint } from '../payoffEngine';
+import { TradeLeg, generatePayoffData, PayoffPoint } from '../payoffEngine';
 
 export function mapToTradeLegs(positions: PortfolioPosition[]): TradeLeg[] {
   return positions.map(pos => ({
@@ -15,7 +15,7 @@ export function mapToTradeLegs(positions: PortfolioPosition[]): TradeLeg[] {
 
 export function generateExpirationPayoff(positions: PortfolioPosition[], currentUnderlyingPrice: number, rangePercent: number = 0.2): PayoffPoint[] {
   const legs = mapToTradeLegs(positions);
-  return calculatePayoff(legs, currentUnderlyingPrice, rangePercent);
+  return generatePayoffData(legs, currentUnderlyingPrice, rangePercent);
 }
 
 export function generateScenarioMatrix(
@@ -29,7 +29,7 @@ export function generateScenarioMatrix(
   for (const pChange of priceChanges) {
     for (const ivChange of ivChanges) {
       let projectedPnL = 0;
-      let notes: string[] = [];
+      const notes: string[] = [];
 
       const targetPrice = currentUnderlyingPrice * (1 + pChange);
 

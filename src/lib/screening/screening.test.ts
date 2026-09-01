@@ -1,7 +1,7 @@
 import { strict as assert } from 'node:assert';
 import { generateCandidates } from './engine';
 import { MarketView, ScreeningFilters } from './types';
-import { OptionContract } from '../providers/marketDataProvider';
+import { OptionContract } from '../providers/MarketDataProvider';
 
 async function runTests() {
   let passed = 0;
@@ -54,7 +54,7 @@ async function runTests() {
   };
 
   runTest('generates bullish candidates and rejects based on maxLoss', () => {
-    let filters = { ...baseFilters, maxLoss: 400 };
+    const filters = { ...baseFilters, maxLoss: 400 };
     let candidates = generateCandidates(dummyChain, 150, baseView, filters);
     
     assert.equal(candidates.some(c => c.strategyName === 'Long Call' && c.legs[0].strike === 150), false);
