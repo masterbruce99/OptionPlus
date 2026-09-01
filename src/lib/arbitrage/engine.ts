@@ -201,9 +201,14 @@ export function analyzePutCallParity(
   // To exploit C overpriced relative to P: Sell Call (Bid), Buy Put (Ask), Buy Stock
   // To exploit P overpriced relative to C: Buy Call (Ask), Sell Put (Bid), Sell Stock
 
+  const callBid = call.bid || 0;
+  const callAsk = call.ask || 0;
+  const putBid = put.bid || 0;
+  const putAsk = put.ask || 0;
+
   // Calculate actual market C - P using midpoints for THEORETICAL display
-  const callMid = (call.bid + call.ask) / 2;
-  const putMid = (put.bid + put.ask) / 2;
+  const callMid = (callBid + callAsk) / 2;
+  const putMid = (putBid + putAsk) / 2;
   const marketCMinusPMid = callMid - putMid;
 
   const midpointDislocation = marketCMinusPMid - theoreticalCMinusP;
@@ -212,8 +217,8 @@ export function analyzePutCallParity(
   // Direction 1: Market C-P > theoretical → sell call / buy put / buy stock
   // Direction 2: Market C-P < theoretical → buy call / sell put / sell stock
 
-  const execCMinusP_dir1 = call.bid - put.ask; // sell call at bid, buy put at ask
-  const execCMinusP_dir2 = call.ask - put.bid; // buy call at ask, sell put at bid
+  const execCMinusP_dir1 = callBid - putAsk; // sell call at bid, buy put at ask
+  const execCMinusP_dir2 = callAsk - putBid; // buy call at ask, sell put at bid
 
   // Gross executable edge for direction 1 (call appears overpriced vs put)
   const grossEdgeDir1 = execCMinusP_dir1 - theoreticalCMinusP;
@@ -228,14 +233,14 @@ export function analyzePutCallParity(
   let legs: ArbitrageLeg[];
   if (direction === 1) {
     legs = [
-      makeLeg('SELL', 'CALL', call.bid, call.ask, 1, strike, expiration),
-      makeLeg('BUY', 'PUT', put.bid, put.ask, 1, strike, expiration),
+      makeLeg('SELL', 'CALL', callBid, callAsk, 1, strike, expiration),
+      makeLeg('BUY', 'PUT', putBid, putAsk, 1, strike, expiration),
       makeLeg('BUY', 'STOCK', underlyingPrice, underlyingPrice, 1),
     ];
   } else {
     legs = [
-      makeLeg('BUY', 'CALL', call.bid, call.ask, 1, strike, expiration),
-      makeLeg('SELL', 'PUT', put.bid, put.ask, 1, strike, expiration),
+      makeLeg('BUY', 'CALL', callBid, callAsk, 1, strike, expiration),
+      makeLeg('SELL', 'PUT', putBid, putAsk, 1, strike, expiration),
       makeLeg('SELL', 'STOCK', underlyingPrice, underlyingPrice, 1),
     ];
   }
@@ -352,8 +357,13 @@ export function analyzeSyntheticStock(
   const r = rateData.status === 'REAL_DATA' ? rateData.rate : 0;
   const T = dte / 365;
 
+  const callBid = call.bid || 0;
+  const callAsk = call.ask || 0;
+  const putBid = put.bid || 0;
+  const putAsk = put.ask || 0;
+
   // Synthetic long stock: Buy call at ask, Sell put at bid
-  const syntheticCost = call.ask - put.bid;
+  const syntheticCost = callAsk - putBid;
   // Equivalent stock position: Buy stock at current price
   // Adjusted for time value: synthetic replicates stock at expiration
   // Theoretical synthetic cost (at parity) = S - PV(K) - PV(D)
@@ -366,8 +376,8 @@ export function analyzeSyntheticStock(
   const grossEdge = grossEdgePerShare * 100;
 
   const legs = [
-    makeLeg('BUY', 'CALL', call.bid, call.ask, 1, strike, expiration),
-    makeLeg('SELL', 'PUT', put.bid, put.ask, 1, strike, expiration),
+    makeLeg('BUY', 'CALL', callBid, callAsk, 1, strike, expiration),
+    makeLeg('SELL', 'PUT', putBid, putAsk, 1, strike, expiration),
   ];
 
   const capitalRequirement = Math.abs(syntheticCost) * 100 + strike * 100;
@@ -399,7 +409,7 @@ export function analyzeSyntheticStock(
     legs,
     pricingRelationship,
     grossEdge,
-    theoreticalMidpointEdge: ((call.bid + call.ask) / 2 - (put.bid + put.ask) / 2 - theoreticalSyntheticCost) * -100,
+    theoreticalMidpointEdge: ((callBid + callAsk) / 2 - (putBid + putAsk) / 2 - theoreticalSyntheticCost) * -100,
     estimatedCosts: costs,
     netEdge,
     capitalRequirement,
@@ -447,13 +457,18 @@ export function analyzeConversion(
   const T = dte / 365;
   const r = rateData.status === 'REAL_DATA' ? rateData.rate : 0;
 
+  const callBid = call.bid || 0;
+  const callAsk = call.ask || 0;
+  const putBid = put.bid || 0;
+  const putAsk = put.ask || 0;
+
   // Conversion legs (executable):
   //   Buy Stock at current price
   //   Buy Put at ASK
   //   Sell Call at BID
   const stockCost = underlyingPrice;
-  const putCost = put.ask;
-  const callCredit = call.bid;
+  const putCost = putAsk;
+  const callCredit = callBid;
 
   // At expiration, position is worth exactly strike regardless of stock price
   // Initial cash flow per share = -stockCost - putCost + callCredit
@@ -474,8 +489,8 @@ export function analyzeConversion(
 
   const legs = [
     makeLeg('BUY', 'STOCK', underlyingPrice, underlyingPrice, 1),
-    makeLeg('BUY', 'PUT', put.bid, put.ask, 1, strike, expiration),
-    makeLeg('SELL', 'CALL', call.bid, call.ask, 1, strike, expiration),
+    makeLeg('BUY', 'PUT', putBid, putAsk, 1, strike, expiration),
+    makeLeg('SELL', 'CALL', callBid, callAsk, 1, strike, expiration),
   ];
 
   const capitalRequirement = (stockCost + putCost) * 100;
@@ -507,7 +522,7 @@ export function analyzeConversion(
     legs,
     pricingRelationship,
     grossEdge,
-    theoreticalMidpointEdge: (((call.bid + call.ask) / 2) - ((put.bid + put.ask) / 2) + strike - stockCost) * 100,
+    theoreticalMidpointEdge: (((callBid + callAsk) / 2) - ((putBid + putAsk) / 2) + strike - stockCost) * 100,
     estimatedCosts: costs,
     netEdge,
     capitalRequirement,
@@ -554,13 +569,18 @@ export function analyzeReversal(
   const dte = daysToExpiration(expiration);
   const r = rateData.status === 'REAL_DATA' ? rateData.rate : 0;
 
+  const callBid = call.bid || 0;
+  const callAsk = call.ask || 0;
+  const putBid = put.bid || 0;
+  const putAsk = put.ask || 0;
+
   // Reversal legs:
   //   Sell Stock at current price (requires borrowing — borrow cost matters!)
   //   Buy Call at ASK
   //   Sell Put at BID
   const stockCredit = underlyingPrice;
-  const callCost = call.ask;
-  const putCredit = put.bid;
+  const callCost = callAsk;
+  const putCredit = putBid;
 
   // Gross edge per share
   // = stockCredit + putCredit - callCost - strike
@@ -569,8 +589,8 @@ export function analyzeReversal(
 
   const legs = [
     makeLeg('SELL', 'STOCK', underlyingPrice, underlyingPrice, 1),
-    makeLeg('BUY', 'CALL', call.bid, call.ask, 1, strike, expiration),
-    makeLeg('SELL', 'PUT', put.bid, put.ask, 1, strike, expiration),
+    makeLeg('BUY', 'CALL', callBid, callAsk, 1, strike, expiration),
+    makeLeg('SELL', 'PUT', putBid, putAsk, 1, strike, expiration),
   ];
 
   const capitalRequirement = strike * 100; // need to cover short stock
@@ -605,7 +625,7 @@ export function analyzeReversal(
       significantDislocation: Math.abs(grossEdgePerShare) > 0.05,
     },
     grossEdge,
-    theoreticalMidpointEdge: (stockCredit + (put.bid + put.ask) / 2 - (call.bid + call.ask) / 2 - strike) * 100,
+    theoreticalMidpointEdge: (stockCredit + (putBid + putAsk) / 2 - (callBid + callAsk) / 2 - strike) * 100,
     estimatedCosts: costs,
     netEdge,
     capitalRequirement,
@@ -661,10 +681,19 @@ export function analyzeBoxSpread(
 
   if (k1 >= k2) throw new Error('Box spread requires K1 < K2');
 
+  const callLowBid = callLow.bid || 0;
+  const callLowAsk = callLow.ask || 0;
+  const callHighBid = callHigh.bid || 0;
+  const callHighAsk = callHigh.ask || 0;
+  const putLowBid = putLow.bid || 0;
+  const putLowAsk = putLow.ask || 0;
+  const putHighBid = putHigh.bid || 0;
+  const putHighAsk = putHigh.ask || 0;
+
   // Long box: pay debit now, receive K2-K1 at expiration
   // Legs: Buy call K1 (ask) + Sell call K2 (bid) + Buy put K2 (ask) + Sell put K1 (bid)
   const boxDebitExecutable =
-    callLow.ask - callHigh.bid + putHigh.ask - putLow.bid;
+    callLowAsk - callHighBid + putHighAsk - putLowBid;
   const strikeWidth = k2 - k1;
 
   // Box is worth exactly strikeWidth at expiration
@@ -674,10 +703,10 @@ export function analyzeBoxSpread(
 
   // Midpoint for THEORETICAL display
   const boxDebitMid =
-    (callLow.bid + callLow.ask) / 2 -
-    (callHigh.bid + callHigh.ask) / 2 +
-    (putHigh.bid + putHigh.ask) / 2 -
-    (putLow.bid + putLow.ask) / 2;
+    (callLowBid + callLowAsk) / 2 -
+    (callHighBid + callHighAsk) / 2 +
+    (putHighBid + putHighAsk) / 2 -
+    (putLowBid + putLowAsk) / 2;
   const theoreticalEdgeMid = (strikeWidth - boxDebitMid) * 100;
 
   // Implied financing rate from the box price
@@ -689,10 +718,10 @@ export function analyzeBoxSpread(
   }
 
   const legs = [
-    makeLeg('BUY', 'CALL', callLow.bid, callLow.ask, 1, k1, expiration),
-    makeLeg('SELL', 'CALL', callHigh.bid, callHigh.ask, 1, k2, expiration),
-    makeLeg('BUY', 'PUT', putHigh.bid, putHigh.ask, 1, k2, expiration),
-    makeLeg('SELL', 'PUT', putLow.bid, putLow.ask, 1, k1, expiration),
+    makeLeg('BUY', 'CALL', callLowBid, callLowAsk, 1, k1, expiration),
+    makeLeg('SELL', 'CALL', callHighBid, callHighAsk, 1, k2, expiration),
+    makeLeg('BUY', 'PUT', putHighBid, putHighAsk, 1, k2, expiration),
+    makeLeg('SELL', 'PUT', putLowBid, putLowAsk, 1, k1, expiration),
   ];
 
   const capitalRequirement = boxDebitExecutable * 100;
@@ -776,19 +805,24 @@ export function analyzeVerticalBounds(
   const kShort = shortContract.strike;
   const expiration = longContract.expiration;
 
+  const longBid = longContract.bid || 0;
+  const longAsk = longContract.ask || 0;
+  const shortBid = shortContract.bid || 0;
+  const shortAsk = shortContract.ask || 0;
+
   // For call debit spread: K_long < K_short
   // For put debit spread: K_long > K_short
   const strikeWidth = Math.abs(kShort - kLong);
 
   // Midpoint values (THEORETICAL)
-  const longMid = (longContract.bid + longContract.ask) / 2;
-  const shortMid = (shortContract.bid + shortContract.ask) / 2;
+  const longMid = (longBid + longAsk) / 2;
+  const shortMid = (shortBid + shortAsk) / 2;
   const spreadMidpointValue = longMid - shortMid;
 
   // Executable values
   // To arbitrage a spread priced above its maximum payoff, we must SELL the spread.
   // Selling the spread = Sell long contract (at bid), Buy short contract (at ask)
-  const spreadExecutableCredit = longContract.bid - shortContract.ask;
+  const spreadExecutableCredit = longBid - shortAsk;
 
   // Violation: if spread value > strike width, there's a no-arbitrage violation
   const midpointViolation = spreadMidpointValue > strikeWidth;
@@ -799,17 +833,17 @@ export function analyzeVerticalBounds(
   const grossEdge = grossEdgePerShare * 100;
 
   const legs = [
-    makeLeg('SELL', type === 'call' ? 'CALL' : 'PUT', longContract.bid, longContract.ask, 1, kLong, expiration),
-    makeLeg('BUY', type === 'call' ? 'CALL' : 'PUT', shortContract.bid, shortContract.ask, 1, kShort, expiration),
+    makeLeg('SELL', type === 'call' ? 'CALL' : 'PUT', longBid, longAsk, 1, kLong, expiration),
+    makeLeg('BUY', type === 'call' ? 'CALL' : 'PUT', shortBid, shortAsk, 1, kShort, expiration),
   ];
 
-  const isInsufficientData = longContract.bid <= 0 || shortContract.ask <= 0;
+  const isInsufficientData = longBid <= 0 || shortAsk <= 0;
   const dataQuality: DataQuality = {
     status: isInsufficientData ? 'INSUFFICIENT' : grossEdge > 0 ? 'VALID' : 'VALID',
     issues: isInsufficientData ? ['One or more contracts have no quote'] : [],
     underlyingValid: underlyingPrice > 0,
-    callQuoteValid: longContract.bid > 0,
-    putQuoteValid: shortContract.ask > 0,
+    callQuoteValid: longBid > 0,
+    putQuoteValid: shortAsk > 0,
     contractParamsValid: longContract.expiration === shortContract.expiration,
     interestRateValid: true,
     dividendValid: true,
@@ -888,19 +922,19 @@ export function assessArbitrageLiquidity(
   const issues: string[] = [];
   let score = 100;
 
-  if (call.volume < 10 || put.volume < 10) {
+  if ((call.volume !== null && call.volume < 10) || (put.volume !== null && put.volume < 10)) {
     score -= 30;
     issues.push('Low volume on call or put (< 10)');
   }
-  if (call.openInterest < 100 || put.openInterest < 100) {
+  if ((call.openInterest !== null && call.openInterest < 100) || (put.openInterest !== null && put.openInterest < 100)) {
     score -= 20;
     issues.push('Low open interest (< 100)');
   }
 
-  const callSpread = call.ask - call.bid;
-  const putSpread = put.ask - put.bid;
-  const callMid = (call.bid + call.ask) / 2;
-  const putMid = (put.bid + put.ask) / 2;
+  const callSpread = (call.ask || 0) - (call.bid || 0);
+  const putSpread = (put.ask || 0) - (put.bid || 0);
+  const callMid = ((call.bid || 0) + (call.ask || 0)) / 2;
+  const putMid = ((put.bid || 0) + (put.ask || 0)) / 2;
 
   if (callMid > 0 && callSpread / callMid > 0.10) {
     score -= 25;

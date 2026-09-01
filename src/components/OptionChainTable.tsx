@@ -79,7 +79,7 @@ export default function OptionChainTable({ chain, underlyingPrice, isBeginnerMod
             const callBg = isCallITM ? 'rgba(46, 204, 113, 0.1)' : 'transparent';
             const putBg = isPutITM ? 'rgba(46, 204, 113, 0.1)' : 'transparent';
             
-            const renderCell = (val: string | number | undefined, onClickOpt?: OptionContract) => (
+            const renderCell = (val: string | number | null | undefined, onClickOpt?: OptionContract) => (
               <td 
                 onClick={() => onClickOpt && onSelectOption(onClickOpt)}
                 style={{ 
@@ -99,7 +99,7 @@ export default function OptionChainTable({ chain, underlyingPrice, isBeginnerMod
                 {!isBeginnerMode && <td style={{ padding: '8px', backgroundColor: callBg }}>{call?.greeks?.theta?.toFixed(4) ?? '-'}</td>}
                 {!isBeginnerMode && <td style={{ padding: '8px', backgroundColor: callBg }}>{call?.greeks?.gamma?.toFixed(4) ?? '-'}</td>}
                 {!isBeginnerMode && <td style={{ padding: '8px', backgroundColor: callBg }}>{call?.greeks?.delta?.toFixed(4) ?? '-'}</td>}
-                <td style={{ padding: '8px', backgroundColor: callBg }}>{call ? (call.impliedVolatility * 100).toFixed(2) + '%' : '-'}</td>
+                <td style={{ padding: '8px', backgroundColor: callBg }}>{call && call.impliedVolatility !== null ? (call.impliedVolatility * 100).toFixed(2) + '%' : '-'}</td>
                 <td style={{ padding: '8px', backgroundColor: callBg }}>{call?.openInterest ?? '-'}</td>
                 <td style={{ padding: '8px', backgroundColor: callBg }}>{call?.volume ?? '-'}</td>
                 {renderCell(call?.last, call)}
@@ -140,7 +140,7 @@ export default function OptionChainTable({ chain, underlyingPrice, isBeginnerMod
                 {renderCell(put?.last, put)}
                 <td style={{ padding: '8px', backgroundColor: putBg }}>{put?.volume ?? '-'}</td>
                 <td style={{ padding: '8px', backgroundColor: putBg }}>{put?.openInterest ?? '-'}</td>
-                <td style={{ padding: '8px', backgroundColor: putBg }}>{put ? (put.impliedVolatility * 100).toFixed(2) + '%' : '-'}</td>
+                <td style={{ padding: '8px', backgroundColor: putBg }}>{put && put.impliedVolatility !== null ? (put.impliedVolatility * 100).toFixed(2) + '%' : '-'}</td>
                 {!isBeginnerMode && <td style={{ padding: '8px', backgroundColor: putBg }}>{put?.greeks?.delta?.toFixed(4) ?? '-'}</td>}
                 {!isBeginnerMode && <td style={{ padding: '8px', backgroundColor: putBg }}>{put?.greeks?.gamma?.toFixed(4) ?? '-'}</td>}
                 {!isBeginnerMode && <td style={{ padding: '8px', backgroundColor: putBg }}>{put?.greeks?.theta?.toFixed(4) ?? '-'}</td>}

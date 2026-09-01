@@ -337,6 +337,7 @@ export default function Dashboard() {
         <div className="animate-fade-in">
           <PortfolioScanner 
             currentUnderlyingPrice={quote ? quote.price : 0} 
+            currentSymbol={quote ? quote.symbol : ''}
           />
         </div>
       )}
@@ -355,7 +356,7 @@ export default function Dashboard() {
 
       {activeTab === 'probability' && (
         <div className="animate-fade-in">
-          <ProbabilityScanner />
+          <ProbabilityScanner quote={quote} chain={chain} expiration={selectedExp} />
         </div>
       )}
 

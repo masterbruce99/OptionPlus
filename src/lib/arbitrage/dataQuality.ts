@@ -51,6 +51,8 @@ export function validateArbitrageData(
   // Check call quotes
   const callQuoteValid =
     call !== null &&
+    typeof call.bid === 'number' &&
+    typeof call.ask === 'number' &&
     isFinite(call.bid) &&
     isFinite(call.ask) &&
     call.ask >= call.bid &&
@@ -61,6 +63,8 @@ export function validateArbitrageData(
   // Check put quotes
   const putQuoteValid =
     put !== null &&
+    typeof put.bid === 'number' &&
+    typeof put.ask === 'number' &&
     isFinite(put.bid) &&
     isFinite(put.ask) &&
     put.ask >= put.bid &&
@@ -140,6 +144,8 @@ export function validateSingleContractData(
 
   const callQuoteValid =
     contract !== null &&
+    typeof contract.bid === 'number' &&
+    typeof contract.ask === 'number' &&
     isFinite(contract.bid) &&
     isFinite(contract.ask) &&
     contract.ask >= contract.bid &&

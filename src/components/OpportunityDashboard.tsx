@@ -21,35 +21,35 @@ const STRATEGY_CONFIGS = [
   { name: 'Long Call', make: (chain: OptionContract[], price: number) => {
     const atm = chain.filter(c => c.type === 'call').sort((a, b) => Math.abs(a.strike - price) - Math.abs(b.strike - price))[0];
     if (!atm) return null;
-    return { legs: [{ id: atm.symbol, type: 'call' as const, side: 'long' as const, strike: atm.strike, quantity: 1, entryPrice: (atm.bid + atm.ask) / 2, multiplier: 100 }], contracts: [atm] };
+    return { legs: [{ id: atm.symbol, type: 'call' as const, side: 'long' as const, strike: atm.strike, quantity: 1, entryPrice: ((atm.bid || 0) + (atm.ask || 0)) / 2, multiplier: 100 }], contracts: [atm] };
   }},
   { name: 'Long Put', make: (chain: OptionContract[], price: number) => {
     const atm = chain.filter(c => c.type === 'put').sort((a, b) => Math.abs(a.strike - price) - Math.abs(b.strike - price))[0];
     if (!atm) return null;
-    return { legs: [{ id: atm.symbol, type: 'put' as const, side: 'long' as const, strike: atm.strike, quantity: 1, entryPrice: (atm.bid + atm.ask) / 2, multiplier: 100 }], contracts: [atm] };
+    return { legs: [{ id: atm.symbol, type: 'put' as const, side: 'long' as const, strike: atm.strike, quantity: 1, entryPrice: ((atm.bid || 0) + (atm.ask || 0)) / 2, multiplier: 100 }], contracts: [atm] };
   }},
   { name: 'Bull Call Spread', make: (chain: OptionContract[], price: number) => {
-    const calls = chain.filter(c => c.type === 'call' && c.bid > 0 && c.ask > 0).sort((a, b) => a.strike - b.strike);
+    const calls = chain.filter(c => c.type === 'call' && c.bid !== null && c.bid > 0 && c.ask !== null && c.ask > 0).sort((a, b) => a.strike - b.strike);
     const longIdx = calls.findIndex(c => c.strike >= price);
     if (longIdx < 0 || longIdx + 1 >= calls.length) return null;
     const long = calls[longIdx], short = calls[longIdx + 1];
     return {
       legs: [
-        { id: long.symbol, type: 'call' as const, side: 'long' as const, strike: long.strike, quantity: 1, entryPrice: (long.bid + long.ask) / 2, multiplier: 100 },
-        { id: short.symbol, type: 'call' as const, side: 'short' as const, strike: short.strike, quantity: 1, entryPrice: (short.bid + short.ask) / 2, multiplier: 100 }
+        { id: long.symbol, type: 'call' as const, side: 'long' as const, strike: long.strike, quantity: 1, entryPrice: ((long.bid || 0) + (long.ask || 0)) / 2, multiplier: 100 },
+        { id: short.symbol, type: 'call' as const, side: 'short' as const, strike: short.strike, quantity: 1, entryPrice: ((short.bid || 0) + (short.ask || 0)) / 2, multiplier: 100 }
       ],
       contracts: [long, short]
     };
   }},
   { name: 'Bear Put Spread', make: (chain: OptionContract[], price: number) => {
-    const puts = chain.filter(c => c.type === 'put' && c.bid > 0 && c.ask > 0).sort((a, b) => a.strike - b.strike);
+    const puts = chain.filter(c => c.type === 'put' && c.bid !== null && c.bid > 0 && c.ask !== null && c.ask > 0).sort((a, b) => a.strike - b.strike);
     const shortIdx = puts.findIndex(c => c.strike >= price);
     if (shortIdx <= 0) return null;
     const short = puts[shortIdx - 1], long = puts[shortIdx];
     return {
       legs: [
-        { id: long.symbol, type: 'put' as const, side: 'long' as const, strike: long.strike, quantity: 1, entryPrice: (long.bid + long.ask) / 2, multiplier: 100 },
-        { id: short.symbol, type: 'put' as const, side: 'short' as const, strike: short.strike, quantity: 1, entryPrice: (short.bid + short.ask) / 2, multiplier: 100 }
+        { id: long.symbol, type: 'put' as const, side: 'long' as const, strike: long.strike, quantity: 1, entryPrice: ((long.bid || 0) + (long.ask || 0)) / 2, multiplier: 100 },
+        { id: short.symbol, type: 'put' as const, side: 'short' as const, strike: short.strike, quantity: 1, entryPrice: ((short.bid || 0) + (short.ask || 0)) / 2, multiplier: 100 }
       ],
       contracts: [long, short]
     };

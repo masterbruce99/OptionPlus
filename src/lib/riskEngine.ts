@@ -32,18 +32,20 @@ export function evaluateRisk(legs: TradeLeg[], contracts: Map<string, OptionCont
     if (!contract) return;
 
     // 2. Wide Bid/Ask Spread Warning
-    const spread = contract.ask - contract.bid;
-    const midPrice = (contract.ask + contract.bid) / 2;
-    if (midPrice > 0 && spread / midPrice > 0.1) {
-      warnings.push({
-        level: 'warning',
-        title: 'WIDE BID/ASK SPREAD',
-        message: `The spread for strike ${leg.strike} ${leg.type.toUpperCase()} is wide (>10%). Execution may be more difficult because the quoted market is relatively wide.`
-      });
+    if (contract.ask !== null && contract.bid !== null) {
+      const spread = contract.ask - contract.bid;
+      const midPrice = (contract.ask + contract.bid) / 2;
+      if (midPrice > 0 && spread / midPrice > 0.1) {
+        warnings.push({
+          level: 'warning',
+          title: 'WIDE BID/ASK SPREAD',
+          message: `The spread for strike ${leg.strike} ${leg.type.toUpperCase()} is wide (>10%). Execution may be more difficult because the quoted market is relatively wide.`
+        });
+      }
     }
 
     // 3. High Implied Volatility Warning
-    if (contract.impliedVolatility > 1.0) { // > 100% IV
+    if (contract.impliedVolatility !== null && contract.impliedVolatility > 1.0) { // > 100% IV
       warnings.push({
         level: 'warning',
         title: 'HIGH IV',
@@ -52,7 +54,7 @@ export function evaluateRisk(legs: TradeLeg[], contracts: Map<string, OptionCont
     }
 
     // 4. Low Liquidity Warning
-    if (contract.volume < 10 && contract.openInterest < 50) {
+    if (contract.volume !== null && contract.openInterest !== null && contract.volume < 10 && contract.openInterest < 50) {
       warnings.push({
         level: 'warning',
         title: 'LOW OPEN INTEREST / LOW VOLUME',

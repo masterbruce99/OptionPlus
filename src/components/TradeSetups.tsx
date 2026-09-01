@@ -27,7 +27,7 @@ export default function TradeSetups({ quote, chain }: Props) {
   const [selectedCandidate, setSelectedCandidate] = useState<StrategyCandidate | null>(null);
 
   const candidates = useMemo(() => {
-    if (!quote || chain.length === 0) return [];
+    if (!quote || chain.length === 0 || quote.price === null) return [];
     return generateCandidates(chain, quote.price, marketView, filters);
   }, [quote, chain, marketView, filters]);
 

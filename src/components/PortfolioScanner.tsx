@@ -5,11 +5,11 @@ import { calculatePositionPnL, aggregatePortfolioGreeks, analyzeConcentration, c
 import { generateScenarioMatrix } from '@/lib/portfolio/scenarios';
 import { analyzeAssignmentRisk, analyzeExpirationRisk, analyzeExerciseRisk, analyzeGreekExposure, analyzeConcentrationRisk, analyzeDataQuality, calculateDeltaHedge } from '@/lib/portfolio/risk';
 
-export function PortfolioScanner({ currentUnderlyingPrice }: { currentUnderlyingPrice: number }) {
+export function PortfolioScanner({ currentUnderlyingPrice, currentSymbol }: { currentUnderlyingPrice: number, currentSymbol: string }) {
   const [positions, setPositions] = useState<PortfolioPosition[]>([]);
   
   // Manual Entry Form State
-  const [symbol, setSymbol] = useState('');
+  const [symbol, setSymbol] = useState(currentSymbol || 'AAPL');
   const [type, setType] = useState<'call' | 'put' | 'stock'>('call');
   const [strike, setStrike] = useState(0);
   const [expiration, setExpiration] = useState('');
@@ -26,9 +26,18 @@ export function PortfolioScanner({ currentUnderlyingPrice }: { currentUnderlying
   }, [positions, currentUnderlyingPrice]);
 
   // Computed state
+  const prices = useMemo(() => {
+    const map: Record<string, number> = {};
+    positions.forEach(p => {
+      // If position symbol matches current dashboard symbol, use live price, else fallback to 100 for notional
+      map[p.underlying] = p.underlying === currentSymbol ? currentUnderlyingPrice : (currentUnderlyingPrice || 100);
+    });
+    return map;
+  }, [positions, currentUnderlyingPrice, currentSymbol]);
+
   const greeks: PortfolioGreeks = aggregatePortfolioGreeks(positions);
   const concentration: ConcentrationReport = analyzeConcentration(positions);
-  const notional = calculateNotionalExposure(positions, { AAPL: currentUnderlyingPrice }); // hardcoding AAPL just for demo if underlying isn't populated
+  const notional = calculateNotionalExposure(positions, prices);
   const premium = calculatePremiumExposure(positions);
   
   const warnings: RiskWarning[] = [

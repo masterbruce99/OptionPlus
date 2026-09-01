@@ -232,13 +232,15 @@ export function calculateLiquidityScore(contracts: OptionContract[]): LiquidityA
   let totalOI = 0;
 
   for (const c of contracts) {
-    const mid = (c.bid + c.ask) / 2;
-    if (mid > 0) {
-      totalSpreadPct += (c.ask - c.bid) / mid;
-      spreadCount++;
+    if (c.bid !== null && c.ask !== null) {
+      const mid = (c.bid + c.ask) / 2;
+      if (mid > 0) {
+        totalSpreadPct += (c.ask - c.bid) / mid;
+        spreadCount++;
+      }
     }
-    totalVolume += c.volume;
-    totalOI += c.openInterest;
+    if (c.volume !== null) totalVolume += c.volume;
+    if (c.openInterest !== null) totalOI += c.openInterest;
   }
 
   const avgSpreadPct = spreadCount > 0 ? totalSpreadPct / spreadCount : 1;
@@ -367,19 +369,19 @@ export function calculateDataQualityScore(contracts: OptionContract[]): DataQual
 
   for (const c of contracts) {
     // Pricing fields
-    if (c.bid > 0) { totalPresent++; hasPricing = true; } else { missingFields.push(`bid missing on strike ${c.strike}`); }
+    if (c.bid !== null && c.bid > 0) { totalPresent++; hasPricing = true; } else { missingFields.push(`bid missing on strike ${c.strike}`); }
     totalRequired++;
-    if (c.ask > 0) { totalPresent++; hasPricing = true; } else { missingFields.push(`ask missing on strike ${c.strike}`); }
+    if (c.ask !== null && c.ask > 0) { totalPresent++; hasPricing = true; } else { missingFields.push(`ask missing on strike ${c.strike}`); }
     totalRequired++;
-    if (c.last > 0) { totalPresent++; } else { missingFields.push(`last missing on strike ${c.strike}`); }
+    if (c.last !== null && c.last > 0) { totalPresent++; } else { missingFields.push(`last missing on strike ${c.strike}`); }
     totalRequired++;
 
     // Market fields
-    if (c.volume > 0) { totalPresent++; hasVolume = true; }
+    if (c.volume !== null && c.volume > 0) { totalPresent++; hasVolume = true; }
     totalRequired++;
-    if (c.openInterest > 0) { totalPresent++; hasOI = true; }
+    if (c.openInterest !== null && c.openInterest > 0) { totalPresent++; hasOI = true; }
     totalRequired++;
-    if (c.impliedVolatility > 0) { totalPresent++; hasIV = true; }
+    if (c.impliedVolatility !== null && c.impliedVolatility > 0) { totalPresent++; hasIV = true; }
     totalRequired++;
 
     // Greeks
@@ -404,7 +406,7 @@ export function calculateDataQualityScore(contracts: OptionContract[]): DataQual
   for (const c of contracts) {
     // bid <= ask
     consistencyChecks++;
-    if (c.bid <= c.ask) {
+    if (c.bid !== null && c.ask !== null && c.bid <= c.ask) {
       consistencyPassed++;
     } else {
       consistencyIssues.push(`Bid > Ask on strike ${c.strike} ${c.type}`);
@@ -412,12 +414,12 @@ export function calculateDataQualityScore(contracts: OptionContract[]): DataQual
 
     // bid > 0 and ask > 0
     consistencyChecks++;
-    if (c.bid > 0 && c.ask > 0) {
+    if (c.bid !== null && c.ask !== null && c.bid > 0 && c.ask > 0) {
       consistencyPassed++;
     }
 
     // last between bid and ask (with 50% tolerance for last-trade drift)
-    if (c.last > 0 && c.bid > 0 && c.ask > 0) {
+    if (c.last !== null && c.last > 0 && c.bid !== null && c.bid > 0 && c.ask !== null && c.ask > 0) {
       consistencyChecks++;
       const tolerance = (c.ask - c.bid) * 0.5;
       if (c.last >= c.bid - tolerance && c.last <= c.ask + tolerance) {
@@ -436,9 +438,9 @@ export function calculateDataQualityScore(contracts: OptionContract[]): DataQual
 
   for (const c of contracts) {
     availabilityTotal += 3;
-    if (c.impliedVolatility > 0) availabilityPresent++;
+    if (c.impliedVolatility !== null && c.impliedVolatility > 0) availabilityPresent++;
     if (c.greeks?.delta != null || c.greeks?.gamma != null || c.greeks?.theta != null || c.greeks?.vega != null) availabilityPresent++;
-    if (c.volume > 0) availabilityPresent++;
+    if (c.volume !== null && c.volume > 0) availabilityPresent++;
   }
 
   const availabilityScore = availabilityTotal > 0 ? (availabilityPresent / availabilityTotal) * 100 : 0;
@@ -546,7 +548,7 @@ export function calculateExecutionScore(contracts: OptionContract[]): ExecutionA
   let score = 100;
 
   // All legs quoted
-  const allLegsQuoted = contracts.every(c => c.bid > 0 && c.ask > 0);
+  const allLegsQuoted = contracts.every(c => c.bid !== null && c.ask !== null && c.bid > 0 && c.ask > 0);
   if (!allLegsQuoted) {
     score -= 30;
     concerns.push('One or more legs have missing bid/ask quotes.');
@@ -556,10 +558,12 @@ export function calculateExecutionScore(contracts: OptionContract[]): ExecutionA
   let totalSpreadPct = 0;
   let spreadCount = 0;
   for (const c of contracts) {
-    const mid = (c.bid + c.ask) / 2;
-    if (mid > 0) {
-      totalSpreadPct += (c.ask - c.bid) / mid;
-      spreadCount++;
+    if (c.bid !== null && c.ask !== null) {
+      const mid = (c.bid + c.ask) / 2;
+      if (mid > 0) {
+        totalSpreadPct += (c.ask - c.bid) / mid;
+        spreadCount++;
+      }
     }
   }
   const avgSpreadPct = spreadCount > 0 ? totalSpreadPct / spreadCount : 1;
@@ -570,7 +574,8 @@ export function calculateExecutionScore(contracts: OptionContract[]): ExecutionA
   }
 
   // Sufficient volume
-  const avgVolume = contracts.reduce((s, c) => s + c.volume, 0) / contracts.length;
+  const totalVol = contracts.reduce((s, c) => s + (c.volume || 0), 0);
+  const avgVolume = totalVol / contracts.length;
   const sufficientVolume = avgVolume >= 100;
   if (!sufficientVolume) {
     score -= 20;
@@ -578,7 +583,8 @@ export function calculateExecutionScore(contracts: OptionContract[]): ExecutionA
   }
 
   // Sufficient open interest
-  const avgOI = contracts.reduce((s, c) => s + c.openInterest, 0) / contracts.length;
+  const totalOIForAvg = contracts.reduce((s, c) => s + (c.openInterest || 0), 0);
+  const avgOI = totalOIForAvg / contracts.length;
   const sufficientOpenInterest = avgOI >= 500;
   if (!sufficientOpenInterest) {
     score -= 15;
@@ -745,9 +751,11 @@ export function identifyInvalidationConditions(
   // Check spread widths
   let hasWideSpread = false;
   contracts.forEach((c) => {
-    const mid = (c.bid + c.ask) / 2;
-    if (mid > 0 && (c.ask - c.bid) / mid > 0.05) {
-      hasWideSpread = true;
+    if (c.bid !== null && c.ask !== null) {
+      const mid = (c.bid + c.ask) / 2;
+      if (mid > 0 && (c.ask - c.bid) / mid > 0.05) {
+        hasWideSpread = true;
+      }
     }
   });
   if (hasWideSpread) {
@@ -761,7 +769,8 @@ export function identifyInvalidationConditions(
   // Check volume
   let hasLowVolume = false;
   contracts.forEach((c) => {
-    if (c.volume < 100) hasLowVolume = true;
+    if (c.volume !== null && c.volume < 100) hasLowVolume = true;
+    if (c.volume === null) hasLowVolume = true; // no volume means low volume
   });
   if (hasLowVolume) {
     conditions.push({
@@ -783,7 +792,7 @@ export function identifyInvalidationConditions(
   // IV sensitivity
   let hasHighIV = false;
   contracts.forEach((c) => {
-    if (c.impliedVolatility > 0.5) hasHighIV = true;
+    if (c.impliedVolatility !== null && c.impliedVolatility > 0.5) hasHighIV = true;
   });
   if (hasHighIV) {
     conditions.push({

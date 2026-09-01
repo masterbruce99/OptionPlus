@@ -139,8 +139,8 @@ export function generateCandidates(
       expCalls.forEach(call => {
         // Delta filter can be applied here. For simplicity, just use all valid ones for now.
         if (!call.greeks.delta || call.greeks.delta < 0.2 || call.greeks.delta > 0.8) return;
-        
-        const leg: TradeLeg = { id: call.strike.toString(), type: 'call', side: 'long', strike: call.strike, quantity: 1, entryPrice: call.ask, multiplier: 100 };
+        if (!call.ask) return; // skip if no ask price
+        const leg: TradeLeg = { id: call.strike.toString(), type: 'call', side: 'long', strike: call.strike, quantity: 1, entryPrice: call.ask || 0, multiplier: 100 };
         try {
           const analysis = analyzeLongCall(leg);
           processCandidate('Long Call', [leg], analysis, exp);
@@ -152,8 +152,8 @@ export function generateCandidates(
     if (view.direction === 'BEARISH' || view.direction === 'STRONGLY BEARISH') {
       expPuts.forEach(put => {
         if (!put.greeks.delta || put.greeks.delta > -0.2 || put.greeks.delta < -0.8) return;
-        
-        const leg: TradeLeg = { id: put.strike.toString(), type: 'put', side: 'long', strike: put.strike, quantity: 1, entryPrice: put.ask, multiplier: 100 };
+        if (!put.ask) return; // skip if no ask price
+        const leg: TradeLeg = { id: put.strike.toString(), type: 'put', side: 'long', strike: put.strike, quantity: 1, entryPrice: put.ask || 0, multiplier: 100 };
         try {
           const analysis = analyzeLongPut(leg);
           processCandidate('Long Put', [leg], analysis, exp);
@@ -168,12 +168,12 @@ export function generateCandidates(
           const buyCall = expCalls[i]; // lower strike
           const sellCall = expCalls[j]; // higher strike
           
-          if (buyCall.ask === 0 || sellCall.bid === 0) continue;
+          if (!buyCall.ask || !sellCall.bid) continue;
           // Filter to reasonable spread width
           if (sellCall.strike - buyCall.strike > 50) continue;
 
-          const leg1: TradeLeg = { id: 'l1', type: 'call', side: 'long', strike: buyCall.strike, quantity: 1, entryPrice: buyCall.ask, multiplier: 100 };
-          const leg2: TradeLeg = { id: 'l2', type: 'call', side: 'short', strike: sellCall.strike, quantity: 1, entryPrice: sellCall.bid, multiplier: 100 };
+          const leg1: TradeLeg = { id: 'l1', type: 'call', side: 'long', strike: buyCall.strike, quantity: 1, entryPrice: buyCall.ask || 0, multiplier: 100 };
+          const leg2: TradeLeg = { id: 'l2', type: 'call', side: 'short', strike: sellCall.strike, quantity: 1, entryPrice: sellCall.bid || 0, multiplier: 100 };
           
           try {
             const analysis = analyzeVerticalSpread(leg1, leg2);
@@ -192,11 +192,11 @@ export function generateCandidates(
           const sellPut = expPuts[i]; // lower strike
           const buyPut = expPuts[j]; // higher strike
           
-          if (buyPut.ask === 0 || sellPut.bid === 0) continue;
+          if (!buyPut.ask || !sellPut.bid) continue;
           if (buyPut.strike - sellPut.strike > 50) continue;
 
-          const leg1: TradeLeg = { id: 'l1', type: 'put', side: 'long', strike: buyPut.strike, quantity: 1, entryPrice: buyPut.ask, multiplier: 100 };
-          const leg2: TradeLeg = { id: 'l2', type: 'put', side: 'short', strike: sellPut.strike, quantity: 1, entryPrice: sellPut.bid, multiplier: 100 };
+          const leg1: TradeLeg = { id: 'l1', type: 'put', side: 'long', strike: buyPut.strike, quantity: 1, entryPrice: buyPut.ask || 0, multiplier: 100 };
+          const leg2: TradeLeg = { id: 'l2', type: 'put', side: 'short', strike: sellPut.strike, quantity: 1, entryPrice: sellPut.bid || 0, multiplier: 100 };
           
           try {
             const analysis = analyzeVerticalSpread(leg1, leg2);
@@ -215,11 +215,11 @@ export function generateCandidates(
           const buyPut = expPuts[i]; // lower strike
           const sellPut = expPuts[j]; // higher strike
           
-          if (buyPut.ask === 0 || sellPut.bid === 0) continue;
+          if (!buyPut.ask || !sellPut.bid) continue;
           if (sellPut.strike - buyPut.strike > 50) continue;
 
-          const leg1: TradeLeg = { id: 'l1', type: 'put', side: 'short', strike: sellPut.strike, quantity: 1, entryPrice: sellPut.bid, multiplier: 100 };
-          const leg2: TradeLeg = { id: 'l2', type: 'put', side: 'long', strike: buyPut.strike, quantity: 1, entryPrice: buyPut.ask, multiplier: 100 };
+          const leg1: TradeLeg = { id: 'l1', type: 'put', side: 'short', strike: sellPut.strike, quantity: 1, entryPrice: sellPut.bid || 0, multiplier: 100 };
+          const leg2: TradeLeg = { id: 'l2', type: 'put', side: 'long', strike: buyPut.strike, quantity: 1, entryPrice: buyPut.ask || 0, multiplier: 100 };
           
           try {
             const analysis = analyzeVerticalSpread(leg1, leg2);
@@ -238,11 +238,11 @@ export function generateCandidates(
           const sellCall = expCalls[i]; // lower strike
           const buyCall = expCalls[j]; // higher strike
           
-          if (buyCall.ask === 0 || sellCall.bid === 0) continue;
+          if (!buyCall.ask || !sellCall.bid) continue;
           if (buyCall.strike - sellCall.strike > 50) continue;
 
-          const leg1: TradeLeg = { id: 'l1', type: 'call', side: 'short', strike: sellCall.strike, quantity: 1, entryPrice: sellCall.bid, multiplier: 100 };
-          const leg2: TradeLeg = { id: 'l2', type: 'call', side: 'long', strike: buyCall.strike, quantity: 1, entryPrice: buyCall.ask, multiplier: 100 };
+          const leg1: TradeLeg = { id: 'l1', type: 'call', side: 'short', strike: sellCall.strike, quantity: 1, entryPrice: sellCall.bid || 0, multiplier: 100 };
+          const leg2: TradeLeg = { id: 'l2', type: 'call', side: 'long', strike: buyCall.strike, quantity: 1, entryPrice: buyCall.ask || 0, multiplier: 100 };
           
           try {
             const analysis = analyzeVerticalSpread(leg1, leg2);

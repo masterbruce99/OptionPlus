@@ -7,20 +7,50 @@ import { calculateProbabilityOfProfit } from '../lib/probability/probabilityOfPr
 import { buildVolatilityContext } from '../lib/probability/volatilityAnalysis';
 import { HistoricalPrice } from '../lib/probability/types';
 
-export default function ProbabilityScanner() {
+import { Quote, OptionContract } from '../lib/providers/MarketDataProvider';
+
+export default function ProbabilityScanner({ quote, chain, expiration }: { quote: Quote | null, chain: OptionContract[], expiration: string }) {
   const [underlyingPrice, setUnderlyingPrice] = useState<number>(100);
   const [strike, setStrike] = useState<number>(100);
   const [daysToExpiration, setDaysToExpiration] = useState<number>(30);
   const [iv, setIv] = useState<number>(0.25);
+
+  React.useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (quote && quote.price !== null) setUnderlyingPrice(quote.price);
+
+    if (chain.length > 0 && quote && quote.price !== null) {
+      const calls = chain.filter(c => c.type === 'call');
+      if (calls.length > 0) {
+        const atm = calls.reduce((prev, curr) =>
+          Math.abs(curr.strike - quote.price!) < Math.abs(prev.strike - quote.price!) ? curr : prev
+        );
+        setStrike(atm.strike);
+        if (atm.impliedVolatility !== null && atm.impliedVolatility > 0) {
+          setIv(atm.impliedVolatility);
+        }
+      }
+    }
+
+    if (expiration) {
+      const parts = expiration.split('-');
+      if (parts.length === 3) {
+        const expDate = new Date(Date.UTC(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]), 16));
+        const diffMs = expDate.getTime() - new Date().getTime();
+        const dte = Math.max(1, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
+        setDaysToExpiration(dte);
+      }
+    }
+  }, [quote, chain, expiration]);
   const riskFreeRate = 0.04;
 
   // Compute values
   const volEM = calculateVolatilityExpectedMove(underlyingPrice, iv, daysToExpiration);
-  
+
   const callProb = calculateOptionProbabilities({
     S: underlyingPrice, K: strike, T: daysToExpiration / 365, r: riskFreeRate, v: iv
   }, 'call');
-  
+
   const popExample = calculateProbabilityOfProfit({
     S: underlyingPrice, breakEven: underlyingPrice + 3.50, T: daysToExpiration / 365, r: riskFreeRate, v: iv, strategy: 'Long Call'
   });
@@ -40,7 +70,7 @@ export default function ProbabilityScanner() {
       <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
         <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Probability & Volatility Intelligence</h2>
         <p className="text-sm text-gray-500 mb-6">
-          Analyze implied volatility, expected market moves, and model-based probabilities. 
+          Analyze implied volatility, expected market moves, and model-based probabilities.
           <span className="font-semibold text-amber-600 dark:text-amber-400"> This is an educational tool, not a trading recommendation system.</span>
         </p>
 
@@ -124,7 +154,7 @@ export default function ProbabilityScanner() {
           {/* Probability Estimates */}
           <div className="border border-gray-200 dark:border-gray-700 rounded p-4 lg:col-span-2">
             <h3 className="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-200">Probability Estimates</h3>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
                 <h4 className="font-medium text-gray-700 dark:text-gray-300 border-b pb-1">ITM Probability (Strike: ${strike})</h4>

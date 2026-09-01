@@ -147,7 +147,7 @@ export default function OptionDetailPanel({ option, underlyingPrice, onClose }: 
                 <EducationalTooltip term="Vega">Vega:</EducationalTooltip> <span>{option.greeks.vega?.toFixed(3) || '-'}</span>
               </li>
               <li style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
-                <EducationalTooltip term="Implied Volatility">IV:</EducationalTooltip> <span>{(option.impliedVolatility * 100).toFixed(2)}%</span>
+                <EducationalTooltip term="Implied Volatility">IV:</EducationalTooltip> <span>{option.impliedVolatility !== null ? (option.impliedVolatility * 100).toFixed(2) + '%' : '-'}</span>
               </li>
             </ul>
           </div>

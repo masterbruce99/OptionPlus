@@ -57,7 +57,7 @@ export default function TradeBuilder({ currentUnderlying, chain, onLegsChange }:
           side,
           strike,
           quantity: qty,
-          entryPrice: contract.last || (contract.bid + contract.ask) / 2 || 0,
+          entryPrice: contract.last || ((contract.bid || 0) + (contract.ask || 0)) / 2 || 0,
           multiplier: 100
         });
       }

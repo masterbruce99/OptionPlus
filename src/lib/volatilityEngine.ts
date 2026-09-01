@@ -25,7 +25,7 @@ export function findATMContract(
   underlyingPrice: number,
   type: 'call' | 'put' = 'call'
 ): OptionContract | null {
-  const candidates = chain.filter(c => c.type === type && c.impliedVolatility > 0);
+  const candidates = chain.filter(c => c.type === type && c.impliedVolatility !== null && c.impliedVolatility > 0);
   if (candidates.length === 0) return null;
 
   return candidates.reduce((best, current) =>
@@ -42,10 +42,10 @@ export function findATMContract(
  */
 export function extractATMIV(chain: OptionContract[], underlyingPrice: number): number | null {
   const atm = findATMContract(chain, underlyingPrice, 'call');
-  if (atm && atm.impliedVolatility > 0) return atm.impliedVolatility;
+  if (atm && atm.impliedVolatility !== null && atm.impliedVolatility > 0) return atm.impliedVolatility;
   // Fallback to put
   const atmPut = findATMContract(chain, underlyingPrice, 'put');
-  if (atmPut && atmPut.impliedVolatility > 0) return atmPut.impliedVolatility;
+  if (atmPut && atmPut.impliedVolatility !== null && atmPut.impliedVolatility > 0) return atmPut.impliedVolatility;
   return null;
 }
 
@@ -259,10 +259,10 @@ export function calculateVolatilitySkew(
   underlyingPrice: number
 ): SkewPoint[] {
   return chain
-    .filter(c => c.impliedVolatility > 0)
+    .filter(c => c.impliedVolatility !== null && c.impliedVolatility > 0)
     .map(c => ({
       strike: c.strike,
-      iv: c.impliedVolatility,
+      iv: c.impliedVolatility as number,
       type: c.type,
       moneyness: underlyingPrice > 0 ? c.strike / underlyingPrice : 0
     }))

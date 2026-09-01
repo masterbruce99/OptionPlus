@@ -35,10 +35,10 @@ export class TradierProvider implements MarketDataProvider {
   }
 
   async getQuote(symbol: string): Promise<Quote> {
-    const data = await this.fetchTradier(`/markets/quotes?symbols=${symbol}`);
+    const data = await this.fetchTradier(`/markets/quotes?symbols=${encodeURIComponent(symbol)}`);
     const quotes = data.quotes?.quote;
     
-    if (!quotes) {
+    if (!quotes || (Array.isArray(quotes) && quotes.length === 0)) {
       throw new Error(`Quote not found for symbol: ${symbol}`);
     }
 
@@ -47,15 +47,15 @@ export class TradierProvider implements MarketDataProvider {
 
     return {
       symbol: quote.symbol,
-      price: quote.last,
-      change: quote.change,
-      changePercentage: quote.change_percentage,
-      volume: quote.volume
+      price: typeof quote.last === 'number' ? quote.last : null,
+      change: typeof quote.change === 'number' ? quote.change : null,
+      changePercentage: typeof quote.change_percentage === 'number' ? quote.change_percentage : null,
+      volume: typeof quote.volume === 'number' ? quote.volume : null
     };
   }
 
   async getOptionExpirations(symbol: string): Promise<string[]> {
-    const data = await this.fetchTradier(`/markets/options/expirations?symbol=${symbol}&includeAllRoots=true`);
+    const data = await this.fetchTradier(`/markets/options/expirations?symbol=${encodeURIComponent(symbol)}&includeAllRoots=true`);
     const expirations = data.expirations?.date;
     
     if (!expirations) {
@@ -66,7 +66,7 @@ export class TradierProvider implements MarketDataProvider {
   }
 
   async getOptionChain(symbol: string, expiration: string): Promise<OptionContract[]> {
-    const data = await this.fetchTradier(`/markets/options/chains?symbol=${symbol}&expiration=${expiration}&greeks=true`);
+    const data = await this.fetchTradier(`/markets/options/chains?symbol=${encodeURIComponent(symbol)}&expiration=${encodeURIComponent(expiration)}&greeks=true`);
     const options = data.options?.option;
     
     if (!options) {
@@ -89,18 +89,18 @@ export class TradierProvider implements MarketDataProvider {
       expiration: opt.expiration_date,
       strike: opt.strike,
       type: opt.option_type === 'call' ? 'call' : 'put',
-      bid: opt.bid || 0,
-      ask: opt.ask || 0,
-      last: opt.last || 0,
-      volume: opt.volume || 0,
-      openInterest: opt.open_interest || 0,
-      impliedVolatility: opt.greeks?.mid_iv || opt.greeks?.smv_vol || 0,
+      bid: typeof opt.bid === 'number' ? opt.bid : null,
+      ask: typeof opt.ask === 'number' ? opt.ask : null,
+      last: typeof opt.last === 'number' ? opt.last : null,
+      volume: typeof opt.volume === 'number' ? opt.volume : null,
+      openInterest: typeof opt.open_interest === 'number' ? opt.open_interest : null,
+      impliedVolatility: typeof opt.greeks?.mid_iv === 'number' ? opt.greeks.mid_iv : (typeof opt.greeks?.smv_vol === 'number' ? opt.greeks.smv_vol : null),
       greeks: {
-        delta: opt.greeks?.delta,
-        gamma: opt.greeks?.gamma,
-        theta: opt.greeks?.theta,
-        vega: opt.greeks?.vega,
-        rho: opt.greeks?.rho,
+        delta: typeof opt.greeks?.delta === 'number' ? opt.greeks.delta : null,
+        gamma: typeof opt.greeks?.gamma === 'number' ? opt.greeks.gamma : null,
+        theta: typeof opt.greeks?.theta === 'number' ? opt.greeks.theta : null,
+        vega: typeof opt.greeks?.vega === 'number' ? opt.greeks.vega : null,
+        rho: typeof opt.greeks?.rho === 'number' ? opt.greeks.rho : null,
       }
     }));
   }

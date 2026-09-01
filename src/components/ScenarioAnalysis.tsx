@@ -29,7 +29,7 @@ export default function ScenarioAnalysis({ legs, currentUnderlying, contracts, d
           // Time to expiration in years (assuming 365 days)
           const T = Math.max(0.001, daysToExpiration / 365);
           const r = 0.05; // Assumed 5% risk-free rate
-          const v = contract.impliedVolatility;
+          const v = contract.impliedVolatility || 0.01;
           
           const estPrice = calculateBlackScholes({
             S: newUnderlying,

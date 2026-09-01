@@ -19,7 +19,7 @@ export default function TimeDecayVisualizer({ contract, daysToExpiration }: Time
   // Simplified visualizer assuming linear theta (not reality, but good enough for beginner conceptualization)
   // Realistically theta accelerates for ATM options.
   const theta = contract.greeks.theta;
-  const currentPrice = contract.last || ((contract.bid + contract.ask) / 2);
+  const currentPrice = contract.last || (((contract.bid || 0) + (contract.ask || 0)) / 2);
   
   // We'll plot from now until expiration
   const data = [];
