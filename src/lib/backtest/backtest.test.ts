@@ -3,7 +3,7 @@ import * as assert from 'node:assert';
 import { calculatePerformanceMetrics } from './metrics';
 import { TradeLedgerEntry } from './types';
 import { BacktestEngine } from './engine';
-import { DefaultHistoricalProvider } from './provider';
+import { DefaultHistoricalProvider } from '../data-infrastructure/provider';
 
 describe('Phase 6: Backtest Metrics and Rules', () => {
 
@@ -81,7 +81,7 @@ describe('Phase 6: Backtest Metrics and Rules', () => {
 
     assert.strictEqual(result.status, 'HISTORICAL_OPTIONS_BACKTEST_UNAVAILABLE_WITH_CURRENT_DATA_SOURCE');
     assert.strictEqual(result.ledger.length, 0);
-    assert.ok(result.reason?.includes('UNAVAILABLE') || result.reason?.includes('not available'));
+    assert.ok(result.reason?.includes('UNAVAILABLE') || result.reason?.includes('not available') || result.reason?.includes('does not support'));
   });
 
   it('Module 9: Look-ahead bias protection logic verified via Data Integrity state', () => {

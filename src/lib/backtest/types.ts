@@ -4,8 +4,10 @@ import { CostConfig } from '../arbitrage/costEngine';
 
 export type StrategyType = 'LONG_CALL' | 'LONG_PUT' | 'COVERED_CALL' | 'CASH_SECURED_PUT' | 'BULL_CALL_SPREAD' | 'BEAR_PUT_SPREAD' | 'BULL_PUT_SPREAD' | 'BEAR_CALL_SPREAD';
 
+import { DataAvailabilityStatus, HistoricalProviderInterface } from '../data-infrastructure/types';
+
 // Module 1 & 2: Data Availability & Provider Interfaces
-export type DataAvailabilityStatus = 'AVAILABLE' | 'PARTIAL' | 'UNAVAILABLE' | 'INSUFFICIENT';
+// Status imported from data-infrastructure
 
 export interface HistoricalOptionChainData {
   status: DataAvailabilityStatus;
@@ -20,10 +22,7 @@ export interface HistoricalPriceData {
   prices: Quote[];
 }
 
-export interface HistoricalMarketDataProvider {
-  getHistoricalUnderlying(symbol: string, startDate: string, endDate: string): Promise<HistoricalPriceData>;
-  getHistoricalOptionChain(symbol: string, date: string, expiration?: string): Promise<HistoricalOptionChainData>;
-}
+export type HistoricalMarketDataProvider = HistoricalProviderInterface;
 
 // Module 3, 5, 6, 7, 8: Configuration and Rules
 export type ExpirationRule = 'NEAREST' | 'DTE_RANGE' | 'SPECIFIC_DATE';

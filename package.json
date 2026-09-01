@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "tsx src/lib/calculations.test.ts && tsx src/lib/educationalEngine.test.ts && tsx src/lib/payoffEngine.test.ts && tsx src/lib/opportunityScoring.test.ts && tsx src/lib/opportunityEngine.test.ts && tsx src/lib/arbitrage/arbitrage.test.ts"
+    "test": "tsx src/lib/calculations.test.ts && tsx src/lib/educationalEngine.test.ts && tsx src/lib/payoffEngine.test.ts && tsx src/lib/opportunityScoring.test.ts && tsx src/lib/opportunityEngine.test.ts && tsx src/lib/arbitrage/arbitrage.test.ts && tsx src/lib/backtest/backtest.test.ts && tsx src/lib/data-infrastructure/data-infrastructure.test.ts"
   },
   "dependencies": {
     "next": "16.3.4",

@@ -7,6 +7,7 @@ import OpportunityDashboard from './OpportunityDashboard';
 import TradeJournal from './TradeJournal';
 import ArbitrageScanner from './ArbitrageScanner';
 import { BacktestScanner } from './BacktestScanner';
+import { DataCenter } from './DataCenter';
 import { OptionContract } from '@/lib/providers/MarketDataProvider';
 
 export default function Dashboard() {
@@ -23,7 +24,7 @@ export default function Dashboard() {
   const [selectedOption, setSelectedOption] = useState<OptionContract | null>(null);
   
   // Phase 3 & later State
-  const [activeTab, setActiveTab] = useState<'chain' | 'analyzer' | 'arbitrage' | 'opportunities' | 'journal' | 'backtest'>('chain');
+  const [activeTab, setActiveTab] = useState<'chain' | 'analyzer' | 'arbitrage' | 'opportunities' | 'journal' | 'backtest' | 'datacenter'>('chain');
 
   const searchSymbol = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -219,6 +220,12 @@ export default function Dashboard() {
           >
             Backtest
           </button>
+          <button 
+            onClick={() => setActiveTab('datacenter')}
+            style={{ padding: '10px 20px', backgroundColor: activeTab === 'datacenter' ? 'var(--accent-primary)' : 'var(--bg-tertiary)', color: activeTab === 'datacenter' ? '#fff' : 'var(--text-primary)', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
+          >
+            Data Center
+          </button>
         </div>
       )}
 
@@ -308,6 +315,12 @@ export default function Dashboard() {
       {activeTab === 'backtest' && (
         <div className="animate-fade-in">
           <BacktestScanner />
+        </div>
+      )}
+
+      {activeTab === 'datacenter' && (
+        <div className="animate-fade-in">
+          <DataCenter />
         </div>
       )}
     </div>

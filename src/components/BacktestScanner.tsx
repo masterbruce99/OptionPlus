@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { BacktestConfig, BacktestResult, ExpirationRule, StrikeRule, EntryRule, ExitRule, ExecutionAssumption, StrategyType } from '../lib/backtest/types';
-import { DefaultHistoricalProvider } from '../lib/backtest/provider';
+import { DefaultHistoricalProvider } from '../lib/data-infrastructure/provider';
 import { BacktestEngine } from '../lib/backtest/engine';
 
 export function BacktestScanner() {

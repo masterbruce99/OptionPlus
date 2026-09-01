@@ -21,12 +21,12 @@ export class BacktestEngine {
     // Here we would implement a date iteration loop.
 
     // Module 28: Fetch historical option data for the start date to verify availability
-    const initialData = await this.provider.getHistoricalOptionChain(
+    const initialData = await this.provider.getHistoricalOptionContracts(
       this.config.underlying, 
       this.config.startDate
     );
 
-    if (initialData.status === 'UNAVAILABLE' || initialData.status === 'INSUFFICIENT') {
+    if (initialData.status === 'UNAVAILABLE' || initialData.status === 'NOT_SUPPORTED') {
       return {
         config: this.config,
         status: 'HISTORICAL_OPTIONS_BACKTEST_UNAVAILABLE_WITH_CURRENT_DATA_SOURCE',
