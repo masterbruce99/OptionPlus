@@ -8,10 +8,10 @@ import {
   MarketEvidence
 } from '../../lib/store';
 
-export function TradeEntryForm({ onSaved }: { onSaved: () => void }) {
+export function TradeEntryForm({ onSaved, initialSymbol, initialPrice }: { onSaved: () => void, initialSymbol?: string, initialPrice?: number }) {
   // Module 1 & 10: Trade Idea / Entry Record
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
-  const [underlying, setUnderlying] = useState('');
+  const [underlying, setUnderlying] = useState(initialSymbol || '');
   const [strategy, setStrategy] = useState('');
   const [contracts, setContracts] = useState(1);
   const [entryPrice, setEntryPrice] = useState(0);
@@ -24,7 +24,7 @@ export function TradeEntryForm({ onSaved }: { onSaved: () => void }) {
   const [expectedOutcome, setExpectedOutcome] = useState('');
   
   // Module 3: Market Evidence
-  const [underlyingPriceAtEntry, setUnderlyingPriceAtEntry] = useState(0);
+  const [underlyingPriceAtEntry, setUnderlyingPriceAtEntry] = useState(initialPrice || 0);
   const [evidenceNotes, setEvidenceNotes] = useState('');
   
   // Modules 6-9: Pre-Trade Checklist & Rules

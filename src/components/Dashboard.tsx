@@ -14,6 +14,7 @@ import TradeSetups from './TradeSetups';
 import { ActivityScanner } from './ActivityScanner';
 import { ChainIntelligence } from './chain-intelligence/ChainIntelligence';
 import { OptionContract } from '../lib/providers/MarketDataProvider';
+import { TradeWorkspace } from './workspace/TradeWorkspace';
 
 export default function Dashboard() {
   const [symbol, setSymbol] = useState('');
@@ -29,7 +30,7 @@ export default function Dashboard() {
   const [selectedOption, setSelectedOption] = useState<OptionContract | null>(null);
   
   // Phase 3 & later State
-  const [activeTab, setActiveTab] = useState<'chain' | 'chain-intelligence' | 'analyzer' | 'arbitrage' | 'opportunities' | 'journal' | 'backtest' | 'datacenter' | 'portfolio' | 'probability' | 'trade-setups' | 'activity'>('chain');
+  const [activeTab, setActiveTab] = useState<'workspace' | 'chain' | 'chain-intelligence' | 'analyzer' | 'arbitrage' | 'opportunities' | 'journal' | 'backtest' | 'datacenter' | 'portfolio' | 'probability' | 'trade-setups' | 'activity'>('workspace');
 
   const searchSymbol = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -188,7 +189,13 @@ export default function Dashboard() {
       )}
 
       {expirations.length > 0 && (
-        <div style={{ marginBottom: '1rem', display: 'flex', gap: '1rem' }}>
+        <div style={{ marginBottom: '1rem', display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+          <button
+            onClick={() => setActiveTab('workspace')}
+            style={{ padding: '10px 20px', backgroundColor: activeTab === 'workspace' ? 'var(--accent-primary)' : 'var(--bg-tertiary)', color: activeTab === 'workspace' ? '#fff' : 'var(--text-primary)', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
+          >
+            Unified Workspace
+          </button>
           <button 
             onClick={() => setActiveTab('chain')}
             style={{ padding: '10px 20px', backgroundColor: activeTab === 'chain' ? 'var(--accent-primary)' : 'var(--bg-tertiary)', color: activeTab === 'chain' ? '#fff' : 'var(--text-primary)', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
@@ -262,6 +269,19 @@ export default function Dashboard() {
             Activity Scanner
           </button>
         </div>
+      )}
+
+      {expirations.length > 0 && activeTab === 'workspace' && (
+        <TradeWorkspace
+          quote={quote}
+          chain={chain}
+          expirations={expirations}
+          selectedExp={selectedExp}
+          onExpChange={(exp) => {
+            setSelectedExp(exp);
+            fetchChain(symbol.toUpperCase(), exp);
+          }}
+        />
       )}
 
       {expirations.length > 0 && activeTab === 'chain' && (
