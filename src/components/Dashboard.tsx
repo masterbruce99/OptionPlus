@@ -6,6 +6,7 @@ import StrategyAnalyzer from './StrategyAnalyzer';
 import OpportunityDashboard from './OpportunityDashboard';
 import TradeJournal from './TradeJournal';
 import ArbitrageScanner from './ArbitrageScanner';
+import { BacktestScanner } from './BacktestScanner';
 import { OptionContract } from '@/lib/providers/MarketDataProvider';
 
 export default function Dashboard() {
@@ -21,8 +22,8 @@ export default function Dashboard() {
   const [isBeginnerMode, setIsBeginnerMode] = useState(true);
   const [selectedOption, setSelectedOption] = useState<OptionContract | null>(null);
   
-  // Phase 3 State
-  const [activeTab, setActiveTab] = useState<'chain' | 'analyzer' | 'arbitrage' | 'opportunities' | 'journal'>('chain');
+  // Phase 3 & later State
+  const [activeTab, setActiveTab] = useState<'chain' | 'analyzer' | 'arbitrage' | 'opportunities' | 'journal' | 'backtest'>('chain');
 
   const searchSymbol = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -212,6 +213,12 @@ export default function Dashboard() {
           >
             Trade Journal
           </button>
+          <button 
+            onClick={() => setActiveTab('backtest')}
+            style={{ padding: '10px 20px', backgroundColor: activeTab === 'backtest' ? 'var(--accent-primary)' : 'var(--bg-tertiary)', color: activeTab === 'backtest' ? '#fff' : 'var(--text-primary)', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
+          >
+            Backtest
+          </button>
         </div>
       )}
 
@@ -295,6 +302,12 @@ export default function Dashboard() {
       {activeTab === 'journal' && (
         <div className="animate-fade-in">
           <TradeJournal />
+        </div>
+      )}
+
+      {activeTab === 'backtest' && (
+        <div className="animate-fade-in">
+          <BacktestScanner />
         </div>
       )}
     </div>

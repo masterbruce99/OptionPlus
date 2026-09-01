@@ -190,3 +190,31 @@ Quote timestamps are evaluated when available. Maximum acceptable age is configu
 - **Rate freshness**: Treasury bill rate is cached for 1 hour; intraday rate changes are not reflected.
 - **Commissions**: Default cost estimates may not match your broker's actual schedule.
 - **No order execution**: This phase is analytical only. No brokerage integration is provided.
+
+## Phase 6 — Historical Options Analysis & Backtesting
+
+### Overview
+Phase 6 implements a real-data historical analysis and backtesting framework for options strategies. 
+It strictly enforces the rule that **no historical data may be fabricated**.
+
+### Data Availability & Provider Limitations
+The current `MarketDataProvider` (Tradier standard REST API) provides point-in-time quotes and real-time option chains, but **does not provide historical point-in-time option chains, historical bid/ask quotes, or Greeks** without a specialized enterprise data subscription.
+Because of this limitation, the engine is explicitly built to identify missing data. If historical option data is unavailable, the backtest immediately halts and reports:
+**`HISTORICAL OPTIONS BACKTEST UNAVAILABLE WITH CURRENT DATA SOURCE`**
+
+### Methodology & Bias Protections
+- **Look-Ahead Bias Protection:** The engine architecture ensures chronological day-by-day iteration. It is structurally impossible for the execution logic to query data with timestamps later than the current loop date.
+- **Survivorship Protection:** Options that expired worthless or were delisted must be included in historical sets. Our historical abstraction requires explicit provider support for expired contracts.
+- **Sample-Size Handling:** If a backtest produces fewer than 30 trade observations, the engine raises a `sampleSizeWarning`. Metrics generated from small samples are statistically unreliable.
+- **In-Sample / Out-of-Sample:** The framework supports dividing data into training (in-sample) and validation (out-of-sample) periods for future optimizer modules, strictly preventing validation data from leaking into the training phase.
+
+### Execution & Cost Assumptions
+- **Execution Assumption:** Users can choose `BID_ASK` (realistic execution assuming the trade crosses the spread) or `MIDPOINT` (optimistic/theoretical execution). 
+- **Transaction Costs:** Inherits the Phase 4 cost engine, precisely applying modeled commissions, exchange fees, slippage, and borrow costs for short legs.
+
+### Available Metrics
+When historical data is successfully sourced, the engine computes:
+- Total Net P/L, Return Percentage, Win Rate
+- Average Win/Loss, Largest Win/Loss, Profit Factor
+- Maximum Drawdown (Peak-to-Trough)
+- Equity Curve and Average Holding Period
