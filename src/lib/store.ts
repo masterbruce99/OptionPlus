@@ -51,6 +51,43 @@ export function clearWatchlist(): void {
   if (typeof window !== 'undefined') localStorage.removeItem(WATCHLIST_KEY);
 }
 
+// --- Generic Storage Helpers ---
+
+function getStorageItems<T>(key: string): T[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const data = localStorage.getItem(key);
+    return data ? JSON.parse(data) : [];
+  } catch (e) {
+    console.error(`Failed to parse ${key} from localStorage`, e);
+    return [];
+  }
+}
+
+function saveStorageItem<T extends { id: string; timestamp?: number }>(
+  key: string,
+  item: Omit<T, 'id' | 'timestamp'>
+): T {
+  const items = getStorageItems<T>(key);
+  const newItem = {
+    ...item,
+    id: generateId(),
+    timestamp: Date.now(),
+  } as unknown as T;
+  items.push(newItem);
+  if (typeof window !== 'undefined') localStorage.setItem(key, JSON.stringify(items));
+  return newItem;
+}
+
+function deleteStorageItem<T extends { id: string }>(key: string, id: string): void {
+  const items = getStorageItems<T>(key).filter(item => item.id !== id);
+  if (typeof window !== 'undefined') localStorage.setItem(key, JSON.stringify(items));
+}
+
+function clearStorageKey(key: string): void {
+  if (typeof window !== 'undefined') localStorage.removeItem(key);
+}
+
 // --- Module 14: Opportunity Snapshots ---
 
 export interface OpportunitySnapshot {
@@ -72,26 +109,11 @@ export interface OpportunitySnapshot {
 const SNAPSHOTS_KEY = 'optionplus_snapshots';
 
 export function getSnapshots(): OpportunitySnapshot[] {
-  if (typeof window === 'undefined') return [];
-  try {
-    const data = localStorage.getItem(SNAPSHOTS_KEY);
-    return data ? JSON.parse(data) : [];
-  } catch (e) {
-    console.error('Failed to parse snapshots from localStorage', e);
-    return [];
-  }
+  return getStorageItems<OpportunitySnapshot>(SNAPSHOTS_KEY);
 }
 
 export function saveSnapshot(snapshot: Omit<OpportunitySnapshot, 'id' | 'timestamp'>): OpportunitySnapshot {
-  const snapshots = getSnapshots();
-  const newSnapshot: OpportunitySnapshot = {
-    ...snapshot,
-    id: generateId(),
-    timestamp: Date.now(),
-  };
-  snapshots.push(newSnapshot);
-  if (typeof window !== 'undefined') localStorage.setItem(SNAPSHOTS_KEY, JSON.stringify(snapshots));
-  return newSnapshot;
+  return saveStorageItem<OpportunitySnapshot>(SNAPSHOTS_KEY, snapshot);
 }
 
 export function getSnapshotById(id: string): OpportunitySnapshot | null {
@@ -99,12 +121,11 @@ export function getSnapshotById(id: string): OpportunitySnapshot | null {
 }
 
 export function deleteSnapshot(id: string): void {
-  const snapshots = getSnapshots().filter(s => s.id !== id);
-  if (typeof window !== 'undefined') localStorage.setItem(SNAPSHOTS_KEY, JSON.stringify(snapshots));
+  deleteStorageItem<OpportunitySnapshot>(SNAPSHOTS_KEY, id);
 }
 
 export function clearSnapshots(): void {
-  if (typeof window !== 'undefined') localStorage.removeItem(SNAPSHOTS_KEY);
+  clearStorageKey(SNAPSHOTS_KEY);
 }
 
 // --- Module 36, 37: Event Snapshots (Phase 15) ---
@@ -123,26 +144,11 @@ export interface EventSnapshot {
 const EVENT_SNAPSHOTS_KEY = 'optionplus_event_snapshots';
 
 export function getEventSnapshots(): EventSnapshot[] {
-  if (typeof window === 'undefined') return [];
-  try {
-    const data = localStorage.getItem(EVENT_SNAPSHOTS_KEY);
-    return data ? JSON.parse(data) : [];
-  } catch (e) {
-    console.error('Failed to parse event snapshots from localStorage', e);
-    return [];
-  }
+  return getStorageItems<EventSnapshot>(EVENT_SNAPSHOTS_KEY);
 }
 
 export function saveEventSnapshot(snapshot: Omit<EventSnapshot, 'id' | 'timestamp'>): EventSnapshot {
-  const snapshots = getEventSnapshots();
-  const newSnapshot: EventSnapshot = {
-    ...snapshot,
-    id: generateId(),
-    timestamp: Date.now(),
-  };
-  snapshots.push(newSnapshot);
-  if (typeof window !== 'undefined') localStorage.setItem(EVENT_SNAPSHOTS_KEY, JSON.stringify(snapshots));
-  return newSnapshot;
+  return saveStorageItem<EventSnapshot>(EVENT_SNAPSHOTS_KEY, snapshot);
 }
 
 export function getEventSnapshotById(id: string): EventSnapshot | null {
@@ -150,8 +156,11 @@ export function getEventSnapshotById(id: string): EventSnapshot | null {
 }
 
 export function deleteEventSnapshot(id: string): void {
-  const snapshots = getEventSnapshots().filter(s => s.id !== id);
-  if (typeof window !== 'undefined') localStorage.setItem(EVENT_SNAPSHOTS_KEY, JSON.stringify(snapshots));
+  deleteStorageItem<EventSnapshot>(EVENT_SNAPSHOTS_KEY, id);
+}
+
+export function clearEventSnapshots(): void {
+  clearStorageKey(EVENT_SNAPSHOTS_KEY);
 }
 
 // --- Module 16-17: Advanced Trade Journal (Phase 13) ---

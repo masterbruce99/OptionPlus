@@ -1,6 +1,7 @@
 import { OptionContract } from '../providers/MarketDataProvider';
 import { MarketEvent } from '../providers/EventDataProvider';
 import { PortfolioPosition } from '../portfolio/types';
+import { calculateStraddleExpectedMove } from '../probability/expectedMove';
 
 export type EventExpirationRelationship = 'BEFORE' | 'ON' | 'AFTER' | 'UNKNOWN';
 
@@ -156,6 +157,7 @@ export function detectEventClusters(events: MarketEvent[], windowDays = 14): Mar
 
 /**
  * MODULE 12 & 13 - EXPECTED MOVE AROUND EVENT (STRADDLE-IMPLIED)
+ * Thin adapter reusing the core probability engine's calculateStraddleExpectedMove formula.
  */
 export interface EventExpectedMove {
   callPremium: number;
@@ -177,17 +179,110 @@ export function calculateStraddleImpliedMove(chain: OptionContract[], currentPri
 
   if (!atmCall || !atmPut) return null;
 
-  const callMid = ((atmCall.bid || 0) + (atmCall.ask || 0)) / 2;
-  const putMid = ((atmPut.bid || 0) + (atmPut.ask || 0)) / 2;
+  const callPrice = ((atmCall.bid || 0) + (atmCall.ask || 0)) / 2 || atmCall.ask || 0;
+  const putPrice = ((atmPut.bid || 0) + (atmPut.ask || 0)) / 2 || atmPut.ask || 0;
   
-  if (callMid === 0 || putMid === 0) return null;
+  if (callPrice <= 0 || putPrice <= 0) return null;
 
-  const straddlePremium = callMid + putMid;
+  // Delegate straddle expected move calculation to core probability engine
+  const moveResult = calculateStraddleExpectedMove(currentPrice, callPrice, putPrice);
+  if (moveResult.status === 'INSUFFICIENT DATA') return null;
 
   return {
-    callPremium: callMid,
-    putPremium: putMid,
-    straddlePremium,
-    methodology: 'ATM Straddle (Call Mid + Put Mid)'
+    callPremium: callPrice,
+    putPremium: putPrice,
+    straddlePremium: moveResult.value,
+    methodology: `ATM Straddle (${moveResult.methodology})`
+  };
+}
+
+/**
+ * MODULE 34 - EVENT CHANGE DETECTION
+ * Compares previous event/snapshot with current event to detect date, time, or timezone changes.
+ */
+export type EventChangeStatus = 'UNCHANGED' | 'CHANGED' | 'UNKNOWN';
+
+export interface EventChangeResult {
+  status: EventChangeStatus;
+  explanation: string;
+  previousDate?: string | null;
+  currentDate?: string | null;
+  previousTime?: string | null;
+  currentTime?: string | null;
+  previousTimezone?: string | null;
+  currentTimezone?: string | null;
+}
+
+export function detectEventDateChange(
+  previous: { id?: string; eventId?: string; symbol?: string; eventType?: string; eventDate?: string | null; eventTime?: string | null; timezone?: string } | null | undefined,
+  current: MarketEvent | null | undefined
+): EventChangeResult {
+  if (!previous || !current) {
+    return {
+      status: 'UNKNOWN',
+      explanation: 'Missing previous or current event data for comparison.'
+    };
+  }
+
+  // Verify event identity match (ID or symbol + eventType)
+  const prevId = previous.eventId || previous.id;
+  const currId = current.id;
+  const isSameId = prevId && currId && prevId === currId;
+  const isSameSymbolType = previous.symbol === current.symbol && previous.eventType === current.eventType;
+
+  if (!isSameId && !isSameSymbolType) {
+    return {
+      status: 'UNKNOWN',
+      explanation: 'Previous and current events refer to different entities.'
+    };
+  }
+
+  const prevDate = previous.eventDate ?? null;
+  const currDate = current.eventDate ?? null;
+  const prevTime = previous.eventTime ?? null;
+  const currTime = current.eventTime ?? null;
+  const prevTz = previous.timezone ?? null;
+  const currTz = current.timezone ?? null;
+
+  if (!prevDate || !currDate) {
+    return {
+      status: 'UNKNOWN',
+      explanation: 'One or both events lack a valid date for change detection.',
+      previousDate: prevDate,
+      currentDate: currDate
+    };
+  }
+
+  const dateChanged = prevDate !== currDate;
+  const timeChanged = prevTime !== null && currTime !== null && prevTime !== currTime;
+  const tzChanged = prevTz !== null && currTz !== null && prevTz !== currTz;
+
+  if (dateChanged || timeChanged || tzChanged) {
+    const changes: string[] = [];
+    if (dateChanged) changes.push(`Date changed from ${prevDate} to ${currDate}`);
+    if (timeChanged) changes.push(`Time changed from ${prevTime} to ${currTime}`);
+    if (tzChanged) changes.push(`Timezone changed from ${prevTz} to ${currTz}`);
+
+    return {
+      status: 'CHANGED',
+      explanation: changes.join('; '),
+      previousDate: prevDate,
+      currentDate: currDate,
+      previousTime: prevTime,
+      currentTime: currTime,
+      previousTimezone: prevTz,
+      currentTimezone: currTz
+    };
+  }
+
+  return {
+    status: 'UNCHANGED',
+    explanation: 'Event date, time, and timezone remain unchanged.',
+    previousDate: prevDate,
+    currentDate: currDate,
+    previousTime: prevTime,
+    currentTime: currTime,
+    previousTimezone: prevTz,
+    currentTimezone: currTz
   };
 }
