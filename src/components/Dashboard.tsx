@@ -16,6 +16,7 @@ import { ChainIntelligence } from './chain-intelligence/ChainIntelligence';
 import { OptionContract } from '../lib/providers/MarketDataProvider';
 import { TradeWorkspace } from './workspace/TradeWorkspace';
 import { EventWorkspace } from './events/EventWorkspace';
+import { AlertsWorkspace } from './alerts/AlertsWorkspace';
 
 export default function Dashboard() {
   const [symbol, setSymbol] = useState('');
@@ -31,7 +32,7 @@ export default function Dashboard() {
   const [selectedOption, setSelectedOption] = useState<OptionContract | null>(null);
   
   // Phase 3 & later State
-  const [activeTab, setActiveTab] = useState<'workspace' | 'chain' | 'chain-intelligence' | 'analyzer' | 'arbitrage' | 'opportunities' | 'journal' | 'backtest' | 'datacenter' | 'portfolio' | 'probability' | 'trade-setups' | 'activity' | 'events'>('workspace');
+  const [activeTab, setActiveTab] = useState<'workspace' | 'chain' | 'chain-intelligence' | 'analyzer' | 'arbitrage' | 'opportunities' | 'journal' | 'backtest' | 'datacenter' | 'portfolio' | 'probability' | 'trade-setups' | 'activity' | 'events' | 'alerts'>('workspace');
 
   const searchSymbol = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -275,6 +276,12 @@ export default function Dashboard() {
           >
             Events & Catalysts
           </button>
+          <button 
+            onClick={() => setActiveTab('alerts')}
+            style={{ padding: '10px 20px', backgroundColor: activeTab === 'alerts' ? 'var(--accent-primary)' : 'var(--bg-tertiary)', color: activeTab === 'alerts' ? '#fff' : 'var(--text-primary)', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
+          >
+            Alerts
+          </button>
         </div>
       )}
 
@@ -439,6 +446,12 @@ export default function Dashboard() {
       {activeTab === 'events' && (
         <div className="animate-fade-in">
           <EventWorkspace />
+        </div>
+      )}
+
+      {activeTab === 'alerts' && (
+        <div className="animate-fade-in">
+          <AlertsWorkspace />
         </div>
       )}
     </div>
