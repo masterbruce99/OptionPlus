@@ -1,0 +1,33 @@
+
+> option-plus@0.1.0 build
+> next build
+
+▲ Next.js 16.3.4 (Turbopack)
+⚠ Warning: Next.js ignored package-lock.json in /Users/home because it is outside the current Git repository (/Users/home/.gemini/antigravity/scratch/OptionPlus).
+ To use this directory, set `turbopack.root` in your Next.js config.
+
+✓ Running next.config.ts took 1060ms
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 53s
+  Running TypeScript ...
+  Finished TypeScript in 17.4s ...
+  Collecting page data using 3 workers ...
+  Generating static pages using 3 workers (0/7) ...
+  Generating static pages using 3 workers (1/7) 
+  Generating static pages using 3 workers (3/7) 
+  Generating static pages using 3 workers (5/7) 
+✓ Generating static pages using 3 workers (7/7) in 3.6s
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ƒ /api/options/chain
+├ ƒ /api/options/expirations
+└ ƒ /api/quote
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

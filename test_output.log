@@ -1,0 +1,407 @@
+
+> option-plus@0.1.0 test
+> tsx src/lib/chain-intelligence/engine.test.ts && tsx src/lib/activity/engine.test.ts && tsx src/lib/calculations.test.ts && tsx src/lib/educationalEngine.test.ts && tsx src/lib/payoffEngine.test.ts && tsx src/lib/opportunityScoring.test.ts && tsx src/lib/opportunityEngine.test.ts && tsx src/lib/arbitrage/arbitrage.test.ts && tsx src/lib/backtest/backtest.test.ts && tsx src/lib/data-infrastructure/data-infrastructure.test.ts && tsx src/lib/portfolio/portfolio.test.ts && tsx src/lib/probability/probability.test.ts && tsx src/lib/screening/screening.test.ts && tsx src/lib/events/eventEngine.test.ts && tsx src/lib/alerts/alertEngine.test.ts
+
+▶ Chain Intelligence Engine
+  ✔ calculateChainQuality: aggregates volume, OI, and spread correctly (1.174563ms)
+  ✔ bucketByDelta: correctly groups contracts (0.442053ms)
+  ✔ calculateStrikeDistance: returns correct absolute and percentage distances (0.242398ms)
+  ✔ calculateStrikeDistance: handles missing data gracefully (0.15296ms)
+  ✔ simulatePortfolioImpact: correctly simulates buying a contract (0.277744ms)
+✔ Chain Intelligence Engine (4.738483ms)
+ℹ tests 5
+ℹ suites 1
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 15.714264
+Testing Activity Engine (Phase 11)
+  ✅ filters out low volume contracts
+  ✅ correctly calculates Volume/OI ratio
+  ✅ handles zero OI gracefully
+  ✅ estimates aggregate notional premium correctly
+  ✅ classifies activity correctly based on score
+  ✅ sets unavailable flags properly
+  ✅ calculates chain-level put/call ratios
+
+================================
+Passed: 7
+Failed: 0
+
+▶ Calculations Engine
+  ✔ Mid Price (1.471947ms)
+  ✔ Spread (0.189116ms)
+  ✔ Spread Percentage (0.253294ms)
+  ✔ Intrinsic Value - Call (0.19017ms)
+  ✔ Intrinsic Value - Put (0.159637ms)
+  ✔ Extrinsic Value (0.182394ms)
+  ✔ Break Even - Call (0.165007ms)
+  ✔ Break Even - Put (0.154587ms)
+  ✔ Categorize DTE (0.22488ms)
+  ✔ Assess Liquidity (0.493737ms)
+  ✔ Trade Direction (0.186539ms)
+✔ Calculations Engine (6.085007ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 12
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 15.394327
+▶ Educational Engine Terminology
+  ✔ Call Option (1.878203ms)
+  ✔ Delta Option (0.46273ms)
+✔ Educational Engine Terminology (5.772654ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 22.238298
+▶ Payoff Engine
+  ✔ Long Call Analysis (4.597787ms)
+  ✔ Long Put Analysis (1.027904ms)
+  ✔ Covered Call Analysis (0.675532ms)
+  ✔ Cash-Secured Put Analysis (0.615307ms)
+  ✔ Bull Call Spread Analysis (Debit) (0.506455ms)
+  ✔ Bear Call Spread Analysis (Credit) (0.352771ms)
+  ✔ Bull Put Spread Analysis (Credit) (0.265821ms)
+  ✔ Bear Put Spread Analysis (Debit) (0.263719ms)
+✔ Payoff Engine (11.176433ms)
+ℹ tests 8
+ℹ suites 1
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 20.641696
+▶ Opportunity Scoring Engines
+  ▶ Edge Quality (Module 3 & 4)
+    ✔ calculates edge for a debit spread (29.77881ms)
+    ✔ calculates edge for a credit spread (0.246276ms)
+    ✔ does NOT annualize when DTE < 7 (0.172425ms)
+    ✔ does NOT annualize when DTE > 365 (0.408718ms)
+    ✔ handles capital-efficient small edge vs large edge correctly (0.199166ms)
+    ✔ handles zero capital requirement (0.268315ms)
+  ✔ Edge Quality (Module 3 & 4) (33.615615ms)
+  ▶ Liquidity Score (Module 5)
+    ✔ scores high-liquidity contracts correctly (1.732953ms)
+    ✔ scores low-liquidity contracts correctly (1.381814ms)
+    ✔ handles empty contract list (0.684427ms)
+    ✔ shows raw measurements (0.909501ms)
+  ✔ Liquidity Score (Module 5) (12.973048ms)
+  ▶ Data Quality Score (Module 6)
+    ✔ scores complete data highly (1.912312ms)
+    ✔ penalizes missing fields (0.421626ms)
+    ✔ handles empty contracts (0.802791ms)
+    ✔ detects bid > ask consistency issue (0.272321ms)
+  ✔ Data Quality Score (Module 6) (3.685615ms)
+  ▶ Execution Score (Module 7)
+    ✔ scores well-quoted contracts highly (3.10463ms)
+    ✔ detects missing quotes (0.413325ms)
+    ✔ detects wide spreads (0.18908ms)
+    ✔ handles empty contracts (0.104758ms)
+  ✔ Execution Score (Module 7) (4.336289ms)
+  ▶ Composite Quality Score (Module 2)
+    ✔ calculates weighted composite correctly (0.732536ms)
+    ✔ clamps scores to 0–100 (0.210758ms)
+    ✔ respects custom weights (5.467079ms)
+  ✔ Composite Quality Score (Module 2) (6.755834ms)
+  ▶ Invalidation Conditions (Module 10)
+    ✔ always includes universal conditions (0.891202ms)
+    ✔ flags low volume (0.477195ms)
+  ✔ Invalidation Conditions (Module 10) (1.597003ms)
+✔ Opportunity Scoring Engines (63.928493ms)
+ℹ tests 23
+ℹ suites 7
+ℹ pass 23
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 138.711808
+▶ Opportunity Engine
+  ▶ Ranking (Module 1)
+    ✔ ranks multiple opportunities by quality score (5.30717ms)
+    ✔ assigns sequential rankings (1.270414ms)
+    ✔ generates explanations for each opportunity (0.348133ms)
+    ✔ includes invalidation conditions (0.32827ms)
+  ✔ Ranking (Module 1) (8.633153ms)
+  ▶ Filtering (Module 12)
+    ✔ filters by underlying (0.598074ms)
+    ✔ high_quality mode filters by thresholds (0.344121ms)
+    ✔ show all does NOT silently filter (0.232488ms)
+  ✔ Filtering (Module 12) (1.485575ms)
+  ▶ Change Detection (Module 15)
+    ✔ detects edge increase (0.391726ms)
+    ✔ detects edge disappearance (0.18275ms)
+    ✔ detects liquidity degradation (0.244689ms)
+    ✔ returns empty when nothing changed (0.155358ms)
+  ✔ Change Detection (Module 15) (1.255391ms)
+✔ Opportunity Engine (12.322869ms)
+ℹ tests 11
+ℹ suites 4
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 22.8212
+▶ Data Quality Gate (Module 12)
+  ✔ VALID when all data present and fresh (1.278753ms)
+  ✔ PARTIAL when interest rate is unavailable (0.291896ms)
+  ✔ PARTIAL when dividend is unavailable (0.202217ms)
+  ✔ INSUFFICIENT when call has no bid/ask (0.16961ms)
+  ✔ INSUFFICIENT when underlying price is missing (0.193151ms)
+  ✔ STALE when quote timestamp is too old (0.379354ms)
+  ✔ PARTIAL (not STALE) when timestamp is unavailable (0.293152ms)
+  ✔ INSUFFICIENT when strike mismatch (0.213647ms)
+  ✔ INSUFFICIENT when expiration mismatch (0.497559ms)
+✔ Data Quality Gate (Module 12) (7.872254ms)
+▶ Put-Call Parity (Module 2)
+  ✔ returns NO_DISLOCATION when prices are at parity (1.329413ms)
+  ✔ gross edge uses BID for sell and ASK for buy — not midpoint (0.298318ms)
+  ✔ classifies as INSUFFICIENT_DATA when call bid/ask are zero (0.171323ms)
+  ✔ includes dividend warning in assumptions when dividend unavailable (0.19847ms)
+  ✔ includes rate warning in assumptions when rate unavailable (0.180392ms)
+  ✔ throws on strike mismatch (0.287129ms)
+  ✔ midpoint dislocation can be positive while executable gross edge is negative (0.172539ms)
+✔ Put-Call Parity (Module 2) (3.003323ms)
+▶ Synthetic Stock (Module 4)
+  ✔ computes synthetic cost as call ask minus put bid (0.412063ms)
+  ✔ flags INSUFFICIENT_DATA when put quotes are missing (0.15221ms)
+✔ Synthetic Stock (Module 4) (0.676544ms)
+▶ Conversion (Module 5)
+  ✔ gross edge is sell call bid minus buy put ask plus strike minus stock (0.419338ms)
+  ✔ gross edge positive but costs may eliminate it (0.213471ms)
+  ✔ has all three legs: stock, put, call (0.214571ms)
+  ✔ dividend warning present when dividend is unavailable (0.161965ms)
+✔ Conversion (Module 5) (1.181682ms)
+▶ Reversal (Module 6)
+  ✔ gross edge is stock minus call ask minus put bid minus strike (0.379235ms)
+  ✔ borrow cost unknown makes net edge UNDETERMINED (0.143798ms)
+  ✔ reversal has short stock leg (0.167443ms)
+  ✔ edge killers mention borrow cost (0.158212ms)
+✔ Reversal (Module 6) (1.017679ms)
+▶ Box Spread (Module 7)
+  ✔ payoff at expiration is exactly K2 - K1 = strike width (0.615216ms)
+  ✔ implied financing rate is computed when executable debit is positive (0.201983ms)
+  ✔ throws when K1 >= K2 (0.146917ms)
+  ✔ explanation mentions financing transaction — not risk-free profit (0.187109ms)
+✔ Box Spread (Module 7) (1.321075ms)
+▶ Vertical Spread Bounds (Module 8)
+  ✔ no violation when spread < strike width (0.536589ms)
+  ✔ THEORETICAL VIOLATION when midpoint spread exceeds strike width (0.246933ms)
+  ✔ EXECUTABLE VIOLATION when executable credit exceeds strike width (0.154815ms)
+  ✔ executable prices differ from midpoint in assumption notes (0.173474ms)
+✔ Vertical Spread Bounds (Module 8) (1.290843ms)
+▶ Cost Engine (Module 11)
+  ✔ unknown borrow cost → UNCONFIGURED status, net edge undetermined (0.315734ms)
+  ✔ no short stock → CONFIGURED status (0.211101ms)
+  ✔ costs are positive and include commission (0.181216ms)
+  ✔ gross edge positive but fees eliminate it produces negative net (0.128967ms)
+✔ Cost Engine (Module 11) (1.091898ms)
+▶ False Positive Protection (Module 21)
+  ✔ midpoint appears profitable but executable bid/ask eliminates edge (0.363094ms)
+  ✔ gross edge positive but financing eliminates it (0.185387ms)
+  ✔ required dividend data missing → PARTIAL status flagged (0.185411ms)
+  ✔ required interest rate missing → assumption warns about zero-rate error (0.174095ms)
+  ✔ missing quote → INSUFFICIENT_DATA classification (0.170519ms)
+  ✔ different strike → throws error (0.130103ms)
+  ✔ different expiration → throws error (0.116063ms)
+  ✔ zero underlying price → INSUFFICIENT data (0.086647ms)
+  ✔ negative underlying price → INSUFFICIENT data (0.083061ms)
+  ✔ wide bid/ask spread flags EXECUTION_UNCERTAIN or NOT_EXECUTABLE (0.117455ms)
+  ✔ reversal borrow cost unknown → net edge null (0.147173ms)
+  ✔ borrow cost known in reversal → net edge is determined (0.151266ms)
+✔ False Positive Protection (Module 21) (2.331013ms)
+▶ Opportunity Classification
+  ✔ NO_DISLOCATION when gross edge is zero or negative (0.249296ms)
+  ✔ each candidate has a timestamp (0.112291ms)
+  ✔ each candidate includes edge killers list (0.29495ms)
+  ✔ each candidate includes explanation string (0.33046ms)
+✔ Opportunity Classification (1.546476ms)
+▶ Dividend Provider (Module 10)
+  ✔ no input → UNAVAILABLE status (0.280836ms)
+  ✔ user input → USER_INPUT status (0.209068ms)
+  ✔ market data → REAL_DATA status (0.117751ms)
+  ✔ continuous yield computed correctly from price and dividend (0.105792ms)
+  ✔ buildZeroDividend returns USER_INPUT not UNAVAILABLE (0.278421ms)
+✔ Dividend Provider (Module 10) (1.312453ms)
+ℹ tests 59
+ℹ suites 11
+ℹ pass 59
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 36.59843
+▶ Phase 6: Backtest Metrics and Rules
+  ✔ Module 14, 15, 16: Calculates profit factor, drawdown, and win rate correctly (1.375791ms)
+  ✔ Module 28: Aborts gracefully with honest UNAVAILABLE status when provider lacks historical option data (0.450292ms)
+  ✔ Module 9: Look-ahead bias protection logic verified via Data Integrity state (0.221534ms)
+✔ Phase 6: Backtest Metrics and Rules (5.154221ms)
+ℹ tests 3
+ℹ suites 1
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 14.564596
+▶ Phase 7: Data Infrastructure
+  ▶ Module 2 & 3: Provider Abstraction & Capabilities
+    ✔ returns NOT_SUPPORTED for all capabilities in DefaultHistoricalProvider (2.850954ms)
+    ✔ returns UNAVAILABLE status gracefully when fetching data from Default provider (0.765281ms)
+  ✔ Module 2 & 3: Provider Abstraction & Capabilities (5.228213ms)
+  ▶ Module 7: Data Validation Engine
+    ✔ detects negative prices as invalid (0.589891ms)
+    ✔ detects ask < bid as invalid (0.309052ms)
+    ✔ detects duplicate timestamps (0.38174ms)
+  ✔ Module 7: Data Validation Engine (2.029284ms)
+  ▶ Module 17: Historical Chain Reconstruction
+    ✔ excludes contracts not yet listed (0.54819ms)
+    ✔ excludes contracts already expired (0.248916ms)
+  ✔ Module 17: Historical Chain Reconstruction (1.131013ms)
+✔ Phase 7: Data Infrastructure (9.534711ms)
+ℹ tests 7
+ℹ suites 4
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 24.122758
+▶ Phase 8: Portfolio Risk & Position Intelligence
+  ▶ Module 1: Position Model & Valuation
+    ✔ calculates P/L correctly for long options using MID (1.135104ms)
+    ✔ calculates P/L correctly for short options using MID (0.209907ms)
+  ✔ Module 1: Position Model & Valuation (2.513634ms)
+  ▶ Module 4: Portfolio Greeks
+    ✔ aggregates portfolio Greeks taking long/short and multipliers into account (0.332859ms)
+    ✔ dollar sensitivities map correctly (0.189077ms)
+  ✔ Module 4: Portfolio Greeks (0.755847ms)
+  ▶ Module 6-8: Concentration
+    ✔ groups exposure by underlying and expiration (0.344059ms)
+  ✔ Module 6-8: Concentration (0.491849ms)
+  ▶ Module 10: Assignment Risk
+    ✔ flags short options for assignment risk (0.305309ms)
+  ✔ Module 10: Assignment Risk (0.514209ms)
+  ▶ Module 19: Hedging Analysis
+    ✔ calculates the correct offsetting hedge quantity (0.385127ms)
+  ✔ Module 19: Hedging Analysis (1.345056ms)
+✔ Phase 8: Portfolio Risk & Position Intelligence (6.666538ms)
+ℹ tests 7
+ℹ suites 6
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 17.796585
+Testing Probability & Volatility Engine
+
+▶ Realized Volatility
+  ✅ calculates annualized volatility correctly
+  ✅ returns null when insufficient history
+
+▶ Expected Move
+  ✅ straddle expected move adds call and put ask
+  ✅ volatility expected move calculates 1 stdev correctly
+  ✅ expected move handles missing/invalid data
+
+▶ Probability Engine (Lognormal / Black-Scholes)
+  ✅ calculates probability above/below correctly (ATM, 0 drift)
+  ✅ ITM probability assigns correctly based on type
+  ✅ handles mathematical edge cases gracefully
+
+▶ Probability of Profit (POP)
+  ✅ long call POP requires price > break-even
+  ✅ short put POP requires price > break-even
+
+▶ Volatility Analysis
+  ✅ builds volatility context accurately with sufficient history
+  ✅ flags INSUFFICIENT DATA when historical IV is missing
+
+================================
+Passed: 12
+Failed: 0
+
+Testing Trade Setup & Strategy Screening Engine
+
+  ✅ generates bullish candidates and rejects based on maxLoss
+  ✅ evaluates thesis consistency correctly
+  ✅ handles contradictory inputs by returning empty or DOES NOT MATCH
+
+================================
+Passed: 3
+Failed: 0
+▶ Phase 15: Event, Catalyst & Expiration Intelligence Engine
+  ▶ Expiration Relationship (Module 10 & 11)
+    ✔ detects option expiring before the event (1.157071ms)
+    ✔ detects option expiring on the event date (0.171853ms)
+    ✔ detects option expiring after the event (0.266499ms)
+    ✔ gracefully returns UNKNOWN for missing event dates (0.43908ms)
+    ✔ gracefully returns UNKNOWN for invalid expirations (0.602876ms)
+  ✔ Expiration Relationship (Module 10 & 11) (4.419573ms)
+  ▶ Event Countdown (Module 9)
+    ✔ returns null for missing event dates (0.270712ms)
+    ✔ calculates days until event accurately (2.073682ms)
+  ✔ Event Countdown (Module 9) (2.626051ms)
+  ▶ Strategy Risk Context (Modules 24 & 17)
+    ✔ warns about short premium risk spanning an event (0.343311ms)
+    ✔ explains that BEFORE coverage does not capture event (0.213522ms)
+    ✔ handles UNKNOWN coverage gracefully (0.289582ms)
+  ✔ Strategy Risk Context (Modules 24 & 17) (1.218682ms)
+  ▶ Event Conflict Detection / Clustering (Module 33)
+    ✔ detects events clustered within 14 days (0.512065ms)
+  ✔ Event Conflict Detection / Clustering (Module 33) (0.623868ms)
+  ▶ Straddle Expected Move Integration (reusing Probability Engine)
+    ✔ calculates expected move delegating to core probability formula (0.600317ms)
+    ✔ returns null for empty chain or missing quotes (0.132746ms)
+  ✔ Straddle Expected Move Integration (reusing Probability Engine) (1.157564ms)
+  ▶ Portfolio Event Exposure (Module 25)
+    ✔ groups portfolio exposure correctly based on event coverage (0.902398ms)
+  ✔ Portfolio Event Exposure (Module 25) (1.022812ms)
+  ▶ Event Date Change Detection (Module 34)
+    ✔ returns UNCHANGED when date, time, and timezone match (0.464298ms)
+    ✔ returns CHANGED when event date is updated (0.24747ms)
+    ✔ returns CHANGED when event time or timezone changes (0.1276ms)
+    ✔ returns UNKNOWN when previous event is missing or null (0.145006ms)
+    ✔ returns UNKNOWN when current event is missing or null (0.093069ms)
+    ✔ returns UNKNOWN for missing event dates (0.119011ms)
+    ✔ returns UNKNOWN for non-matching event entities (3.54964ms)
+  ✔ Event Date Change Detection (Module 34) (5.150603ms)
+✔ Phase 15: Event, Catalyst & Expiration Intelligence Engine (20.139978ms)
+ℹ tests 21
+ℹ suites 8
+ℹ pass 21
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 34.53684
+▶ AlertEngine - Operator Evaluation
+  ✔ evaluates ABOVE (2.216845ms)
+  ✔ evaluates CROSSED_ABOVE (0.237543ms)
+  ✔ evaluates CHANGED_BY_PERCENT (1.20994ms)
+✔ AlertEngine - Operator Evaluation (5.203301ms)
+▶ AlertEngine - Evaluation and False Positive Protection
+  ✔ does not trigger on unavailable data (0.875703ms)
+  ✔ triggers when condition is met and prevents repeated triggers (0.859754ms)
+  ✔ handles multiple conditions (AND) (0.240498ms)
+✔ AlertEngine - Evaluation and False Positive Protection (2.321781ms)
+ℹ tests 6
+ℹ suites 2
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 16.980754
