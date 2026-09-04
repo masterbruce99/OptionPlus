@@ -1,5 +1,5 @@
 import { TradeLeg } from '../payoffEngine';
-import { MarketView } from '../store'; // we can use the same MarketView
+import { MarketViewDirection as MarketView } from '../store'; // we can use the same MarketView
 
 export type ExecutionQuality = 'READY' | 'ACCEPTABLE' | 'CAUTION' | 'BLOCKED' | 'INSUFFICIENT_DATA';
 
