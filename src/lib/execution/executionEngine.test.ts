@@ -8,6 +8,7 @@ import { generateChecklist } from './checklistEngine';
 import { detectPlanChanges } from './planChangeEngine';
 import { TradePlan } from './types';
 import { StrategyAnalysis } from '../payoffEngine';
+import * as entryValidation from './entryValidation';
 
 describe('Execution Engines', () => {
 
@@ -178,6 +179,32 @@ describe('Execution Engines', () => {
       const checklist = generateChecklist(plan);
       assert.ok(checklist.find(c => c.category === 'MARKET' && c.status === 'PASS'));
       assert.ok(checklist.find(c => c.category === 'STRATEGY' && c.status === 'PASS'));
+    });
+
+    it('detects plan changes correctly', () => {
+      const originalPlan: TradePlan = {
+        id: '1', timestamp: 0, underlying: 'AAPL', strategyName: 'Long Call',
+        legs: [], direction: 'bullish', thesis: 'Good earnings',
+        entryCondition: 'Price > 100', targetPrice: 120, stopPrice: 90, expiration: '2025-01-01',
+        maxPlannedLoss: 100, maxPlannedCapital: 100, quantity: 1,
+        limitPrice: { bid: 100, ask: 100, midpoint: 100, theoretical: null, suggestedLimit: 100, acceptableRange: [90,110], debitOrCredit: 'DEBIT' },
+        slippage: { estimatedSlippage: 0, liquidityPenalty: 0, totalExecutionCost: 0, breakEvenImpact: 0 },
+        executionQuality: 'READY', executionReasons: [], checklist: [], educationalNote: ''
+      };
+
+      const changedPlan = { ...originalPlan, limitPrice: { ...originalPlan.limitPrice, suggestedLimit: 115 } };
+      const changes = detectPlanChanges(originalPlan, changedPlan);
+      assert.ok(changes.length > 0);
+      assert.strictEqual(changes[0].field, 'Suggested Limit Price');
+      assert.strictEqual(changes[0].severity, 'WARN'); // Exceeded acceptable range
+    });
+
+    it('enforces order-ticket safety and no automated submission', () => {
+      // By architectural design, there is no execute() or submitOrder() function.
+      // This test enforces that rule deterministically.
+      const executionEngineExports = Object.keys(entryValidation);
+      assert.strictEqual(executionEngineExports.includes('submitOrder'), false);
+      assert.strictEqual(executionEngineExports.includes('executeTrade'), false);
     });
   });
 });

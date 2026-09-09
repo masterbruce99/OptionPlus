@@ -1,6 +1,5 @@
 import { TradePlan } from '../execution/types';
 import { PositionGreeks } from '../portfolio/types';
-import { TradeLeg } from '../payoffEngine';
 
 export type PositionStatus = 'PLANNED' | 'READY' | 'ENTERED' | 'OPEN' | 'ADJUSTMENT_NEEDED' | 'EXIT_READY' | 'CLOSED';
 

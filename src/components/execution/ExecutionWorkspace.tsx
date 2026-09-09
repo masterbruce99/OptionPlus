@@ -14,7 +14,10 @@ export function ExecutionWorkspace() {
   const [fillPrices, setFillPrices] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    setPlans(getTradePlans());
+    const timer = setTimeout(() => {
+      setPlans(getTradePlans());
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   const handleCreateMockPlan = () => {
@@ -137,7 +140,7 @@ export function ExecutionWorkspace() {
       contracts: activePlan.quantity,
       entryPrice: fills.reduce((sum, fill) => sum + fill.fillPrice, 0), // Simplified net entry
       legs: activePlan.legs.map(l => ({
-        type: l.type as any,
+        type: (l.type === 'stock' ? 'call' : l.type) as 'call' | 'put',
         strike: l.strike,
         expiration: activePlan.expiration || '',
         action: l.side === 'long' ? 'buy' : 'sell',
@@ -147,7 +150,7 @@ export function ExecutionWorkspace() {
       status: 'open'
     };
 
-    const newJournal = addJournalEntry(journalEntry);
+    addJournalEntry(journalEntry);
     
     // We update the live position's plan ID to point to the journal entry so closing works seamlessly
     // In our code above `plan.id` is preserved from `activePlan`. But we could just link it.

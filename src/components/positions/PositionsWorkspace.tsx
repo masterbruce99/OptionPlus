@@ -4,19 +4,22 @@ import { LivePosition } from '../../lib/positions/types';
 import { getLivePositions, updateLivePosition } from '../../lib/positions/positionStore';
 import PositionCard from './PositionCard';
 
-interface PositionsWorkspaceProps {
-  quote: Quote | null;
-  chain: OptionContract[];
+interface Props {
   symbol: string;
+  quote?: Quote | null;
+  chain?: OptionContract[];
 }
 
-export function PositionsWorkspace({ quote, chain, symbol }: PositionsWorkspaceProps) {
+export function PositionsWorkspace({ symbol, quote = null, chain = [] }: Props) {
   const [positions, setPositions] = useState<LivePosition[]>([]);
 
   useEffect(() => {
     // In a real app we'd fetch all positions, but we'll filter by current selected symbol
     const all = getLivePositions();
-    setPositions(all.filter(p => p.underlying === symbol));
+    const filtered = all.filter(p => p.underlying === symbol);
+    // Use a small timeout to avoid synchronous cascading renders
+    const timer = setTimeout(() => setPositions(filtered), 0);
+    return () => clearTimeout(timer);
   }, [symbol]);
 
   const handlePositionUpdated = (updated: LivePosition) => {
@@ -24,7 +27,7 @@ export function PositionsWorkspace({ quote, chain, symbol }: PositionsWorkspaceP
     setPositions(prev => prev.map(p => p.id === updated.id ? updated : p));
   };
 
-  const handlePositionClosed = (closed: LivePosition, review: string) => {
+  const handlePositionClosed = (closed: LivePosition) => {
     updateLivePosition(closed.id, closed);
     setPositions(prev => prev.map(p => p.id === closed.id ? closed : p));
   };
@@ -42,7 +45,7 @@ export function PositionsWorkspace({ quote, chain, symbol }: PositionsWorkspaceP
       {openPositions.length === 0 && closedPositions.length === 0 && (
         <div style={{ textAlign: 'center', padding: '3rem', background: 'var(--bg-tertiary)', borderRadius: '4px' }}>
           <p className="text-muted">No positions recorded for {symbol}.</p>
-          <p style={{ fontSize: '0.9rem' }}>Use the Execution Workspace to plan a trade, then click "Record Fills & Open Position".</p>
+          <p style={{ fontSize: '0.9rem' }}>Use the Execution Workspace to plan a trade, then click &quot;Record Fills &amp; Open Position&quot;.</p>
         </div>
       )}
 

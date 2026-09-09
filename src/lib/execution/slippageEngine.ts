@@ -46,7 +46,7 @@ export function calculateSlippage(legContexts: LegMarketContext[], volumeData: (
   const estimatedSlippage = spreadCost * 0.25;
 
   // Liquidity penalty: if volume is very low across legs, we might pay more of the spread
-  let minVolume = Math.min(...(volumeData as number[]));
+  const minVolume = Math.min(...(volumeData as number[]));
   let liquidityPenalty = 0;
   if (minVolume < 50) {
     liquidityPenalty = spreadCost * 0.5; // low liquidity means we might cross the full spread

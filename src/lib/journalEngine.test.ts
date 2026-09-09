@@ -4,6 +4,9 @@ import {
 } from './journalEngine';
 import { AdvancedJournalEntry } from './store';
 
+import { describe, test as it } from 'node:test';
+import * as assert from 'node:assert';
+
 describe('journalEngine', () => {
   const baseEntry: AdvancedJournalEntry = {
     id: 'test',
@@ -53,7 +56,7 @@ describe('journalEngine', () => {
       }
     };
 
-    expect(calculateThesisAccuracy(entry)).toBe('CORRECT');
+    assert.strictEqual(calculateThesisAccuracy(entry), 'CORRECT');
   });
 
   it('determines partially correct thesis', () => {
@@ -73,7 +76,7 @@ describe('journalEngine', () => {
       }
     };
 
-    expect(calculateThesisAccuracy(entry)).toBe('PARTIALLY_CORRECT');
+    assert.strictEqual(calculateThesisAccuracy(entry), 'PARTIALLY_CORRECT');
   });
 
   it('calculates win rate', () => {
@@ -107,6 +110,6 @@ describe('journalEngine', () => {
       }
     };
 
-    expect(calculateWinRate([winningEntry, losingEntry])).toBe(50);
+    assert.strictEqual(calculateWinRate([winningEntry, losingEntry]), 50);
   });
 });

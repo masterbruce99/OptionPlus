@@ -66,7 +66,6 @@ export function calculateLimitPrice(legContexts: LegMarketContext[]): LimitPrice
   }
 
   const midpoint = (totalBid + totalAsk) / 2;
-  const suggestedLimit = midpoint; // Midpoint is typically the suggested limit
   const conservative = totalBid;
   const aggressive = totalAsk;
 

@@ -19,6 +19,8 @@ import { EventWorkspace } from './events/EventWorkspace';
 import { AlertsWorkspace } from './alerts/AlertsWorkspace';
 import { ExecutionWorkspace } from './execution/ExecutionWorkspace';
 import { PositionsWorkspace } from './positions/PositionsWorkspace';
+import { PortfolioOptimizationWorkspace } from './portfolio-optimization/PortfolioOptimizationWorkspace';
+
 export default function Dashboard() {
   const [symbol, setSymbol] = useState('');
   const [loading, setLoading] = useState(false);
@@ -33,7 +35,7 @@ export default function Dashboard() {
   const [selectedOption, setSelectedOption] = useState<OptionContract | null>(null);
   
   // Phase 3 & later State
-  const [activeTab, setActiveTab] = useState<'workspace' | 'chain' | 'chain-intelligence' | 'analyzer' | 'arbitrage' | 'opportunities' | 'journal' | 'backtest' | 'datacenter' | 'portfolio' | 'probability' | 'trade-setups' | 'activity' | 'events' | 'alerts' | 'execution' | 'live-positions'>('workspace');
+  const [activeTab, setActiveTab] = useState<'workspace' | 'chain' | 'chain-intelligence' | 'analyzer' | 'arbitrage' | 'opportunities' | 'journal' | 'backtest' | 'datacenter' | 'portfolio' | 'probability' | 'trade-setups' | 'activity' | 'events' | 'alerts' | 'execution' | 'live-positions' | 'portfolio-optimization'>('workspace');
 
   const searchSymbol = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -295,6 +297,12 @@ export default function Dashboard() {
           >
             Live Positions
           </button>
+          <button 
+            onClick={() => setActiveTab('portfolio-optimization')}
+            style={{ padding: '10px 20px', backgroundColor: activeTab === 'portfolio-optimization' ? 'var(--accent-primary)' : 'var(--bg-tertiary)', color: activeTab === 'portfolio-optimization' ? '#fff' : 'var(--text-primary)', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
+          >
+            Adv. Portfolio
+          </button>
         </div>
       )}
 
@@ -471,6 +479,15 @@ export default function Dashboard() {
       {activeTab === 'live-positions' && (
         <div className="animate-fade-in">
           <PositionsWorkspace quote={quote} chain={chain} symbol={quote?.symbol || symbol} />
+        </div>
+      )}
+
+      {activeTab === 'portfolio-optimization' && (
+        <div className="animate-fade-in">
+          <PortfolioOptimizationWorkspace 
+            positions={[]} // Mock for now, in a real integration this would come from a global store/API
+            portfolioValue={100000} // Mock for now
+          />
         </div>
       )}
     </div>

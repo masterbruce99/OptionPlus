@@ -1,5 +1,5 @@
 import React from 'react';
-import { LivePosition, AdjustmentRecommendation } from '../../lib/positions/types';
+import { LivePosition } from '../../lib/positions/types';
 import { Quote, OptionContract } from '../../lib/providers/MarketDataProvider';
 import { calculateRealTimePnL, evaluateLifecycleState, evaluateAdjustments, closePosition } from '../../lib/positions/positionEngine';
 import AdjustmentPanel from './AdjustmentPanel';
@@ -12,7 +12,7 @@ interface PositionCardProps {
   onPositionClosed: (position: LivePosition, review: string) => void;
 }
 
-export default function PositionCard({ position, currentQuote, currentChain, onPositionUpdated, onPositionClosed }: PositionCardProps) {
+export default function PositionCard({ position, currentQuote, currentChain, onPositionClosed }: PositionCardProps) {
   
   // Real-time calculation if quote is available
   const pnl = currentQuote ? calculateRealTimePnL(position, currentQuote, currentChain) : position.currentPnL;

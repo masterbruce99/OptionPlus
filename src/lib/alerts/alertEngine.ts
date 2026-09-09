@@ -36,7 +36,7 @@ export class AlertEngine {
       if (alert.contract && ctx.chain) {
         const opt = ctx.chain.find(o => o.symbol === alert.contract);
         if (opt) {
-          const val = (opt as any)[condition.field]; // 'bid', 'ask', 'last'
+          const val = (opt as unknown as Record<string, unknown>)[condition.field]; // 'bid', 'ask', 'last'
           return { value: typeof val === 'number' ? val : null, freshness: typeof val === 'number' ? 'FRESH' : 'UNAVAILABLE' };
         }
       }

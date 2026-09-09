@@ -1,4 +1,4 @@
-import { PortfolioPosition, PortfolioGreeks, RiskWarning, ConcentrationReport } from './types';
+import { PortfolioPosition, PortfolioGreeks, RiskWarning, ConcentrationReport, RiskLevel, PortfolioRiskProfile } from './types';
 
 export function analyzeAssignmentRisk(positions: PortfolioPosition[]): RiskWarning[] {
   const warnings: RiskWarning[] = [];
@@ -156,4 +156,65 @@ export function calculateDeltaHedge(portfolioDeltaShareEquivalent: number): numb
   // -100 portfolio delta -> buy 100 shares -> hedge is 100
   // +100 portfolio delta -> short 100 shares -> hedge is -100
   return -portfolioDeltaShareEquivalent;
+}
+
+function determineRiskLevel(value: number, moderateThresh: number, highThresh: number, criticalThresh: number): RiskLevel {
+  if (value >= criticalThresh) return 'CRITICAL';
+  if (value >= highThresh) return 'HIGH';
+  if (value >= moderateThresh) return 'MODERATE';
+  return 'LOW';
+}
+
+export function calculateRiskProfile(
+  greeks: PortfolioGreeks,
+  concentration: ConcentrationReport,
+  portfolioValue: number
+): PortfolioRiskProfile {
+  // Configurable thresholds could be passed in, but we'll use base thresholds as a fraction of portfolioValue if available
+  // otherwise fallback to static defaults
+  const baseValue = portfolioValue > 0 ? portfolioValue : 10000;
+  
+  // Directional (Delta)
+  // Let's say > 20% of portfolio value in raw delta is high
+  const deltaPct = Math.abs(greeks.dollarDelta) / baseValue;
+  const directional = determineRiskLevel(deltaPct, 0.1, 0.25, 0.5);
+
+  // Convexity (Gamma)
+  const gammaPct = Math.abs(greeks.dollarGamma) / baseValue;
+  const convexity = determineRiskLevel(gammaPct, 0.01, 0.03, 0.05);
+
+  // Time Decay (Theta) - daily decay vs portfolio value
+  const thetaPct = Math.abs(greeks.dollarTheta) / baseValue;
+  const timeDecay = determineRiskLevel(thetaPct, 0.005, 0.01, 0.03);
+
+  // Volatility (Vega) - 1% IV change impact vs portfolio value
+  const vegaPct = Math.abs(greeks.dollarVega) / baseValue;
+  const volatility = determineRiskLevel(vegaPct, 0.01, 0.03, 0.05);
+
+  // Concentration
+  let maxConc = 0;
+  const totalCapital = Object.values(concentration.underlying).reduce((sum, u) => sum + u.capital, 0);
+  if (totalCapital > 0) {
+    for (const u of Object.values(concentration.underlying)) {
+       const pct = u.capital / totalCapital;
+       if (pct > maxConc) maxConc = pct;
+    }
+  }
+  const concentrationLevel = determineRiskLevel(maxConc, 0.2, 0.4, 0.6);
+
+  // Overall is max of all
+  const levels = [directional, convexity, timeDecay, volatility, concentrationLevel];
+  let overall: RiskLevel = 'LOW';
+  if (levels.includes('CRITICAL')) overall = 'CRITICAL';
+  else if (levels.includes('HIGH')) overall = 'HIGH';
+  else if (levels.includes('MODERATE')) overall = 'MODERATE';
+
+  return {
+    directional,
+    convexity,
+    timeDecay,
+    volatility,
+    concentration: concentrationLevel,
+    overall
+  };
 }

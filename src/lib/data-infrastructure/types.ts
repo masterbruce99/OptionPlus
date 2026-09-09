@@ -107,3 +107,18 @@ export interface HistoricalProviderInterface {
     frequency: SamplingFrequency
   ): Promise<{ status: DataAvailabilityStatus, data: NormalizedHistoricalQuote[], reason?: string }>;
 }
+
+import { OptionContract } from '../providers/MarketDataProvider';
+export interface OptionChain {
+  symbol: string;
+  currentPrice: number;
+  expirations: {
+    date: string;
+    daysToExpiration: number;
+    strikes: {
+      strike: number;
+      call?: OptionContract;
+      put?: OptionContract;
+    }[];
+  }[];
+}

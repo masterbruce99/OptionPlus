@@ -57,10 +57,21 @@ export type RiskSeverity = 'INFO' | 'WARNING' | 'CRITICAL';
 
 export interface RiskWarning {
   id: string;
-  type: 'CONCENTRATION' | 'GREEK_EXPOSURE' | 'ASSIGNMENT' | 'EXERCISE' | 'EXPIRATION' | 'DATA_QUALITY';
+  type: 'CONCENTRATION' | 'GREEK_EXPOSURE' | 'ASSIGNMENT' | 'EXERCISE' | 'EXPIRATION' | 'DATA_QUALITY' | 'PORTFOLIO_LIMIT';
   severity: RiskSeverity;
   message: string;
   affectedPositions?: string[];
+}
+
+export type RiskLevel = 'LOW' | 'MODERATE' | 'HIGH' | 'CRITICAL' | 'INSUFFICIENT_DATA';
+
+export interface PortfolioRiskProfile {
+  directional: RiskLevel;
+  convexity: RiskLevel;
+  timeDecay: RiskLevel;
+  volatility: RiskLevel;
+  concentration: RiskLevel;
+  overall: RiskLevel;
 }
 
 export interface ScenarioResult {

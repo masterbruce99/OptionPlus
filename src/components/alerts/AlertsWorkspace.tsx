@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Alert, AlertHistoryEvent, AlertType } from '../../lib/alerts/types';
+import { Alert, AlertHistoryEvent, AlertType, AlertConditionOperator } from '../../lib/alerts/types';
 import { getAlerts, saveAlert, deleteAlert, getAlertHistory } from '../../lib/alerts/alertStore';
 import { NotificationEngine } from '../../lib/alerts/notificationEngine';
 
@@ -15,8 +15,11 @@ export function AlertsWorkspace() {
   const [newThresh, setNewThresh] = useState('0');
   
   useEffect(() => {
-    setAlerts(getAlerts());
-    setHistory(getAlertHistory());
+    const timer = setTimeout(() => {
+      setAlerts(getAlerts());
+      setHistory(getAlertHistory());
+    }, 0);
+    return () => clearTimeout(timer);
   }, [view]);
 
   const handleCreate = () => {
@@ -24,7 +27,7 @@ export function AlertsWorkspace() {
       id: Date.now().toString(),
       type: newType,
       symbol: newSymbol.toUpperCase(),
-      conditions: [{ field: newField, operator: newOp as any, threshold: parseFloat(newThresh) }],
+      conditions: [{ field: newField, operator: newOp as AlertConditionOperator, threshold: parseFloat(newThresh) }],
       timestamp: Date.now(),
       source: 'User Configuration',
       status: 'ACTIVE',
