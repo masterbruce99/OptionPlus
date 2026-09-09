@@ -17,7 +17,7 @@ import { OptionContract } from '../lib/providers/MarketDataProvider';
 import { TradeWorkspace } from './workspace/TradeWorkspace';
 import { EventWorkspace } from './events/EventWorkspace';
 import { AlertsWorkspace } from './alerts/AlertsWorkspace';
-import { ExecutionWorkspace } from './execution/ExecutionWorkspace';
+
 import { PositionsWorkspace } from './positions/PositionsWorkspace';
 import { PortfolioOptimizationWorkspace } from './portfolio-optimization/PortfolioOptimizationWorkspace';
 import { BrokerWorkspace } from './broker/BrokerWorkspace';
